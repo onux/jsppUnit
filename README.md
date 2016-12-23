@@ -1,10 +1,12 @@
 # js++Unit
 
-js++Unit is an xUnit unit testing framework for writing and running automated tests.
+js++Unit is an xUnit unit testing framework for writing and running automated tests using the JS++ programming language.
 
 The library features a very concise and familiar syntax. js++Unit was inspired by the [Mocha](https://github.com/mochajs/mocha) test framework for JavaScript and other xUnit frameworks.
 
 ## Getting Started
+
+Download the [ConsoleStyle](https://github.com/onux/jspp/tree/master/Libraries/ConsoleStyle) library, which js++Unit depends on.
 
 In your editor, create a `test.jspp`:
 
