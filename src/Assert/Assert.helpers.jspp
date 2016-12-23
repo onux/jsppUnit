@@ -1,0 +1,145 @@
+import Externals.JS;
+
+module Vendor.JSPPUnit.Assert
+{
+	/**
+	 * Gets the keys for an object (shallow).
+	 *
+	 * @param obj The object to retrieve the keys for.
+	 * @return An array of object keys.
+	 */
+	private function /*string[]*/ getObjectKeys(external obj) {
+		var /*string[]*/ props = [];
+		for (string prop in obj) {
+			props.push(prop);
+		}
+
+		return props.sort();
+	}
+	/**
+	 * Perform a strict equality comparison.
+	 *
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 * @return The result of the comparison operation.
+	 */
+	private /*inline*/ bool operator_equal(external a, external b) {
+		return a === b;
+	}
+	/**
+	 * Perform an unstrict equality comparison.
+	 *
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 * @return The result of the comparison operation.
+	 */
+	private /*inline*/ bool operator_unstrictEqual(external a, external b) {
+		return a == b;
+	}
+	/**
+	 * Recursively compares two values using depth-first search.
+	 *
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 * @param compareEquality The comparison function to use to compare the values.
+	 * @return The result of the comparison function applied recursively to both values.
+	 */
+	private bool deepCompare(external a, external b, bool(external, external) compareEquality) {
+		var visited = [];
+		bool equal = (bool descend(external a, external b) {
+			if (compareEquality(a, b)) {
+				return true;
+			}
+			if (typeof a == "string" || typeof b == "string") {
+				return compareEquality(a, b);
+			}
+			if (typeof a == "number" || typeof b == "number") {
+				return compareEquality(a, b);
+			}
+			if (typeof a == "boolean" || typeof b == "boolean") {
+				return compareEquality(a, b);
+			}
+			if (typeof a == "function" || typeof b == "function") {
+				return compareEquality(a, b);
+			}
+			if (a == null || b == null) {
+				return compareEquality(a, b);
+			}
+			bool sameInternalClass = 	Externals.JS.Object.prototype.toString.call(a) ==
+										Externals.JS.Object.prototype.toString.call(b);
+			if (!sameInternalClass) {
+				return false;
+			}
+
+			bool bothArrays = 	Externals.JS.Object.prototype.toString.call(a) == "[object Array]" &&
+								Externals.JS.Object.prototype.toString.call(b) == "[object Array]";
+			if (bothArrays && a.length === b.length) {
+				int i = 0, len = a.length;
+				for (; i < len; ++i) {
+					if (a[i] !== b[i] && !descend(a[i], b[i])) {
+						break;
+					}
+				}
+
+				if (i === b.length) {
+					return true;
+				}
+			}
+
+			bool bothRegexp = 	Externals.JS.Object.prototype.toString.call(a) == "[object RegExp]" &&
+								Externals.JS.Object.prototype.toString.call(b) == "[object RegExp]";
+			if (bothRegexp) {
+				return compareEquality(a.toString(), b.toString());
+			}
+
+			bool bothDate = 	Externals.JS.Object.prototype.toString.call(a) == "[object Date]" &&
+								Externals.JS.Object.prototype.toString.call(b) == "[object Date]";
+			if (bothDate) {
+				return compareEquality(+a, +b);
+			}
+
+			bool bothObjects = typeof a == "object" && typeof b == "object";
+			ok(bothObjects, "Assert failed: Unexpected type for 'deepCompare'");
+
+			var /*string[]*/ keysA = getObjectKeys(a), keysB = getObjectKeys(b);
+			bool objectsHaveSameKeys = keysA.length == keysB.length;
+			if (objectsHaveSameKeys) {
+				int i = 0, len = keysA.length;
+				string keyA, keyB;
+				var valueA, valueB;
+				bool keysMatch, valuesMatch, valuesDeeplyMatch;
+
+				for (; i < len; ++i) {
+					keyA = keysA[i];
+					valueA = a[keyA];
+					keyB = keysB[i];
+					valueB = b[keyB];
+
+					if (~visited.indexOf(valueA)) {
+						continue;
+					}
+					visited.push(valueA);
+
+					keysMatch = keyA === keyB;
+					valuesMatch = compareEquality(valueA, valueB);
+					if (!keysMatch || !valuesMatch) {
+						valuesDeeplyMatch = descend(valueA, valueB);
+
+						if (!valuesDeeplyMatch) {
+							break;
+						}
+					}
+				}
+
+				if (compareEquality(i, keysB.length)) {
+					return true;
+				}
+			}
+
+			return false;
+		})(a, b);
+		visited = null;
+
+		return equal;
+	}
+}

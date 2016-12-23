@@ -1,0 +1,205 @@
+import Vendor.Onux.ConsoleStyle;
+
+external console;
+external process, Date;
+
+// States
+// These are HACKS until we have classes/module fields
+external /*int*/ counter_runTests = 0, counter_passedTests = 0, counter_failedTests = 0, counter_skippedTests = 0, counter_indent = 0;
+external /*System.Dictionary<string, void()>*/ suitesQueue = [];
+external /*string*/ PADDING = "  ";
+external global = (function() { return this; }).call(); // ugly hack to get a mutable "running" bool (global.running)
+
+/**
+ * js++Unit is an xUnit testing framework for writing and running automated 
+ * tests.
+ */
+module Vendor.JSPPUnit
+{
+	// TODO: RFCT: refactor to a private 'Utils' module once we have classes to access PADDING globally
+	/**
+	 * Gets the indentation for pretty printing test output to the console.
+	 *
+	 * @return The currently-appropriate indentation as a string.
+	 */
+	private string getPadding() {
+		string padding = PADDING;
+		for (int i = 0; i < counter_indent; ++i) {
+			padding += PADDING;
+		}
+
+		return padding;
+	}
+	/**
+	 * Prints the title for the current test suite.
+	 */
+	private void printSuiteTitle(string title) {
+		console.log(getPadding() + title);
+		console.log("");
+	}
+
+	// TODO: RFCT: refactor to a 'Run' module?
+	// TODO: RFCT: refactor runSuite() common logic... only type is different. compiler bug?
+	/**
+	 * @overload runSuite
+	 *
+	 * Executes a test suite.
+	 */
+	/**
+	 * @param code The callback defined for the test suite.
+	 */
+	private void runSuite(void() code) {
+		++counter_indent;
+		code();
+		console.log("");
+		--counter_indent;
+	}
+	/**
+	 * @param code The callback defined for the test suite.
+	 */
+	private void runSuite(external code) {
+		++counter_indent;
+		code();
+		console.log("");
+		--counter_indent;
+	}
+	/**
+	 * @overload runTest
+	 *
+	 * Executes a test.
+	 */
+	/**
+	 * @param title The title defined for the test.
+	 * @param code The callback defined for the test.
+	 * @param exceptionPasses Does a thrown exception qualify as a passed test?
+	 */
+	private void runTest(string title, void() code, bool exceptionPasses) {
+		runTest(title, code, exceptionPasses, null);
+	}
+	/**
+	 * @param title The title defined for the test.
+	 * @param code The callback defined for the test.
+	 * @param exceptionPasses Does a thrown exception qualify as a passed test?
+	 * @param exception The exception to expect if a thrown exception qualifies as a passed test.
+	 */
+	private void runTest(string title, void() code, bool exceptionPasses, external exception) {
+		bool caught = false;
+		var exceptionObject;
+		string PASS = "\u2714", FAIL = "\u2716";
+
+		try {
+			code();
+		}
+		catch(external e) {
+			bool requiresException = exception != null;
+			bool exceptionMatches = e === exception;
+
+			caught = requiresException ? exceptionMatches : true;
+			exceptionObject = e;
+		}
+		finally {
+			if (exceptionPasses ? caught : !caught) {
+				console.log(getPadding() + ConsoleStyle.Colors.green(PADDING + PASS) + " " + ConsoleStyle.Colors.gray(title));
+				++counter_passedTests;
+			}
+			else {
+				console.log(getPadding() + ConsoleStyle.Colors.red(PADDING + FAIL + " " +  title));
+
+				if (!exceptionPasses) {
+					console.log(getPadding() + PADDING + ConsoleStyle.Colors.red(exceptionObject));
+					++counter_failedTests;
+				}
+			}
+		}
+
+		++counter_runTests;
+	}
+
+	/**
+	 * Defines a test suite.
+	 *
+	 * @param title The title of the test suite.
+	 * @param code The code for the test suite.
+	 */
+	public void suite(string title, void() code) {
+		if (global.running) {
+			printSuiteTitle(title);
+			runSuite(code);
+		}
+		else {
+			suitesQueue.push({
+				title: title,
+				code: code
+			});
+		}
+	}
+
+	/**
+	 * Defines a test.
+	 *
+	 * @param title The title of the test.
+	 * @param code The code for the test.
+	 */
+	public void test(string title, void() code) {
+		runTest(title, code, false);
+	}
+
+	/**
+	 * Defines a skipped test.
+	 *
+	 * @param title The title of the test.
+	 * @param code The code for the test.
+	 */
+	public void skip(string title, void() code) {
+		string SKIP = "\u25CB";
+		console.log(getPadding() + ConsoleStyle.Colors.cyan(PADDING + SKIP + " " + title));
+		++counter_skippedTests;
+	}
+
+	/**
+	 * Defines a test that expects an exception to be thrown.
+	 *
+	 * @param title The title of the test.
+	 * @param code The code for the test.
+	 */
+	public void throws(string title, void() code) {
+		runTest(title, code, true);
+	}
+	/**
+	 * Defines a test that expects a specific exception to be thrown.
+	 *
+	 * @param title The title of the test.
+	 * @param code The code for the test.
+	 * @param exception The type of exception to expect.
+	 */
+	public void throws(string title, void() code, external exception) {
+		runTest(title, code, true, exception);
+	}
+
+
+	/**
+	 * Runs the defined tests.
+	 */
+	public void run() {
+		global.running = true;
+		console.log("");
+
+		var t = new Date;
+
+		// TODO: refactor to 'foreach' once it becomes available
+		for (int i = 0, len = suitesQueue.length; i < len; ++i) {
+			printSuiteTitle(suitesQueue[i].title);
+			runSuite(suitesQueue[i].code);
+		}
+
+		console.log("");
+		if (counter_passedTests > 0)  console.log(PADDING + ConsoleStyle.Colors.green(counter_passedTests + " passing") + ConsoleStyle.Colors.gray(" (" +(new Date - t) + "ms)"));
+		if (counter_skippedTests > 0) console.log(PADDING + ConsoleStyle.Colors.cyan(counter_skippedTests + " skipped"));
+		if (counter_failedTests > 0)  console.log(PADDING + ConsoleStyle.Colors.red(counter_failedTests + " failed"));
+		console.log("");
+
+		if (counter_failedTests > 0 && typeof process == "object") {
+			process.exit(1);
+		}
+	}
+}

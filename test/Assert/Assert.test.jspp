@@ -1,0 +1,832 @@
+import Vendor.JSPPUnit;
+import Vendor.JSPPUnit.Assert;
+import Vendor.JSPPUnit.Assert.Test.Utils;
+import Vendor.JSPPUnit.Assert.Test.Proxies;
+import Externals.JS;
+
+/**
+ * Tests for the JSPPUnit.Assert assertion library.
+ */
+module Vendor.JSPPUnit.Assert.Test
+{
+	/**
+	 * Queues the Assert library's tests for the test runner.
+	 */
+	public void queue() {
+		string defaultAssertError = "Assertion error";
+
+		suite("Vendor.JSPPUnit.Assert", void() {
+			test("ok", void() {
+				Utils.isTrueTest(_ok);
+
+				ok(0 === 0);
+				ok(1 === 1, "Basic equality");
+				err(void() { ok(1 === 0); }, defaultAssertError);
+				err(void() { ok(1 === 0, "1 does not equal 0"); }, "1 does not equal 0");
+			});
+			test("equal", void() {
+				equal(1, 1);
+				equal(0, 0);
+				equal(true, true);
+				equal(false, false);
+				equal("", "");
+				equal("foo", "foo");
+
+				err(void() { equal(1, 0); }, defaultAssertError);
+				err(void() { equal(1, true); }, defaultAssertError);
+				err(void() { equal(false, ""); }, defaultAssertError);
+
+				int x = 100, y = 100, z = 200;
+				equal(x, y);
+				equal(x, y, "Testing assertion message");
+				err(void() { equal(x, z); }, defaultAssertError);
+				err(void() { equal(y, z, "Expected y === z"); }, "Expected y === z");
+			});
+			test("unstrictEqual", void() {
+				unstrictEqual(1, 1);
+				unstrictEqual(0, 0);
+				unstrictEqual(0, "0");
+				unstrictEqual(true, true);
+				unstrictEqual(true, 1);
+				unstrictEqual("", false);
+
+				err(void() { unstrictEqual(1, 0); }, defaultAssertError);
+				err(void() { unstrictEqual(false, true); }, defaultAssertError);
+
+				int x = 100, y = 100, z = 200;
+				unstrictEqual(x, y);
+				unstrictEqual(x, y, "Testing assertion message");
+				err(void() { unstrictEqual(x, z); }, defaultAssertError);
+				err(void() { unstrictEqual(y, z, "Expected y === z"); }, "Expected y === z");
+			});
+			test("deepEqual", void() {
+				deepEqual(0, 0);
+				deepEqual(1, 1);
+				deepEqual(-100, -100, "error message");
+				deepEqual(true, true);
+				deepEqual(false, false);
+				deepEqual("", "");
+				deepEqual("abc", "abc");
+				deepEqual(undefined, undefined);
+				deepEqual(null, null);
+
+				deepEqual({}, {});
+				deepEqual({ "a": "b" }, { "a": "b" });
+				deepEqual({ "a": "b", "c": 100 }, { "a": "b", "c": 100 });
+				deepEqual({ "c": 100, "a": "b" }, { "a": "b", "c": 100 });
+				deepEqual(
+					{ "a": "b", "c": { "d": 100, "e": "e" } },
+					{ "a": "b", "c": { "d": 100, "e": "e" } }
+				);
+				deepEqual(
+					{ "a": "b", "c": { "e": "e", "d": 100 } },
+					{ "a": "b", "c": { "d": 100, "e": "e" } }
+				);
+				deepEqual([], []);
+				deepEqual([ 1, 2, 3 ], [ 1, 2, 3 ]);
+				deepEqual([ 1, 2, [ 3, 4 ] ], [ 1, 2, [ 3, 4 ] ]);
+				deepEqual([ { "a": "b", "c": 100 } ], [ { "a": "b", "c": 100 } ]);
+				deepEqual(
+					[ { "a": "b", "c": { "d": 100, "e": "e" } }, {}, { "f": true } ],
+					[ { "a": "b", "c": { "d": 100, "e": "e" } }, {}, { "f": true } ]
+				);
+
+				var cycle = {};
+				cycle.cycle = cycle;
+				deepEqual(cycle, cycle);
+
+				var cycle1 = {}, cycle2 = {};
+				cycle1.a = cycle2;
+				cycle2.a = cycle1;
+				deepEqual(cycle1, cycle2);
+
+				var c1 = {}, c2 = {}, c3 = {};
+				c1.a = c2;
+				c2.a = c3;
+				c3.a = c1;
+				deepEqual(c1.a.a.a, c1);
+				deepEqual(c2.a.a.a, c2);
+				deepEqual(c3.a.a.a, c3);
+
+				var arr_cycle = [];
+				arr_cycle.push(arr_cycle);
+				deepEqual(arr_cycle[0], arr_cycle);
+				arr_cycle.push(arr_cycle);
+				deepEqual(arr_cycle[1], arr_cycle);
+
+				var c = [];
+				c.push({ "c": c });
+				deepEqual(c[0].c, c);
+				err(void() { deepEqual(c[0].c[0], c, "not a cycle"); }, "not a cycle");
+				deepEqual(c[0].c[0].c, c);
+				var o = {};
+				o.o = [ o ];
+				deepEqual(o.o[0], o);
+				err(void() { deepEqual(o.o[0].o, o, "not a cycle"); }, "not a cycle");
+				deepEqual(o.o[0].o[0], o);
+
+				var x = { y: new Date() };
+				deepEqual(x, x);
+
+				var re = /abc/;
+				deepEqual(re, re);
+
+				err(void() { deepEqual(1, new Externals.JS.Number(1)); }, defaultAssertError);
+				err(void() { deepEqual(true, new Externals.JS.Boolean(true)); }, defaultAssertError);
+				err(void() { deepEqual("abc", new Externals.JS.String("abc")); }, defaultAssertError);
+
+				err(void() { deepEqual(null, undefined); }, defaultAssertError);
+				err(void() { deepEqual(1, 2); }, defaultAssertError);
+
+				err(void() { deepEqual([ 1, 2, 3 ], [ 1, 2 ]); }, defaultAssertError);
+				err(void() { deepEqual([ 1, 2 ], [ 1, 2, 3 ]); }, defaultAssertError);
+				err(void() { deepEqual([ 1, 2 ], [ 2, 1 ]); }, defaultAssertError);
+				err(void() { deepEqual([ 1, 2, undefined ], [ 1, 2 ]); }, defaultAssertError);
+				err(void() { deepEqual([ 1, 2, 3 ], { 0: 1, 1: 2, 2: 3 }); }, defaultAssertError);
+				err(void() { deepEqual([ 1, 2, 3 ], [ 1, 2, [ 3 ] ]); }, defaultAssertError);
+				err(void() { deepEqual([ 1, 2, [ 3, 4 ] ], [ 1, 2, [ 4, 3 ] ]); }, defaultAssertError);
+
+				deepEqual(/abc/, /abc/);
+				deepEqual(/(?:)/, /(?:)/);
+				err(void() { deepEqual(/abc/, /.+/); }, defaultAssertError);
+
+				deepEqual(new Date(), new Date());
+				deepEqual(new Date("2011-03-31"), new Date("2011-03-31"));
+				err(void() { deepEqual(1234, new Date(1234)); }, defaultAssertError);
+				err(void() { deepEqual(new Date(1234), 1234); }, defaultAssertError);
+				err(void() { deepEqual(new Date("2011-03-31"), new Date("2011-03-30")); }, defaultAssertError);
+
+				err(void() { deepEqual({ "a": "b" }, {}); }, defaultAssertError);
+				err(void() { deepEqual({ "a": 1 }, { "a": "1" }, "property types not equal"); }, "property types not equal");
+				err(void() { deepEqual({ "a": "b" }, { "a": "c" }, "properties not equal"); }, "properties not equal");
+				err(void() { deepEqual({ "a": undefined }, { "a": null }, "properties not equal"); }, "properties not equal");
+				err(void() { deepEqual({ "a": { "b" : "b" } }, { "a": { "b": "c" } }, "deep properties not equal"); }, "deep properties not equal");
+				err(void() { deepEqual({ "a": { "b" : [ 1, 2, 3 ] } }, { "a": { "b": [ 1, 2 ] } }, "deep properties not equal"); }, "deep properties not equal");
+				err(void() { deepEqual({ "a": { "b" : [ 1, 2, 3 ] } }, { "a": { "b": [ 1, 2, 4 ] } }, "deep properties not equal"); }, "deep properties not equal");
+
+				function foo(){}
+				function bar(){}
+
+				deepEqual(foo, foo);
+				err(void() { deepEqual(foo, bar); }, defaultAssertError);
+			});
+			test("deepUnstrictEqual", void() {
+				deepUnstrictEqual(0, 0);
+				deepUnstrictEqual(1, 1);
+				deepUnstrictEqual(-100, -100, "error message");
+				deepUnstrictEqual(true, true);
+				deepUnstrictEqual(false, false);
+				deepUnstrictEqual("", "");
+				deepUnstrictEqual("abc", "abc");
+				deepUnstrictEqual(undefined, undefined);
+				deepUnstrictEqual(null, null);
+
+				deepUnstrictEqual(3, [ 3 ]);
+				deepUnstrictEqual([ 1, 2, 3 ], [ 1, 2, [ 3 ] ]);
+
+				deepUnstrictEqual({ "a": undefined }, { "a": null });
+
+				deepUnstrictEqual({}, {});
+				deepUnstrictEqual({ "a": "b" }, { "a": "b" });
+				deepUnstrictEqual({ "a": "b", "c": 100 }, { "a": "b", "c": 100 });
+				deepUnstrictEqual({ "c": 100, "a": "b" }, { "a": "b", "c": 100 });
+				deepUnstrictEqual(
+					{ "a": "b", "c": { "d": 100, "e": "e" } },
+					{ "a": "b", "c": { "d": 100, "e": "e" } }
+				);
+				deepUnstrictEqual(
+					{ "a": "b", "c": { "e": "e", "d": 100 } },
+					{ "a": "b", "c": { "d": 100, "e": "e" } }
+				);
+				deepUnstrictEqual([], []);
+				deepUnstrictEqual([ 1, 2, 3 ], [ 1, 2, 3 ]);
+				deepUnstrictEqual([ 1, 2, [ 3, 4 ] ], [ 1, 2, [ 3, 4 ] ]);
+				deepUnstrictEqual([ { "a": "b", "c": 100 } ], [ { "a": "b", "c": 100 } ]);
+				deepUnstrictEqual(
+					[ { "a": "b", "c": { "d": 100, "e": "e" } }, {}, { "f": true } ],
+					[ { "a": "b", "c": { "d": 100, "e": "e" } }, {}, { "f": true } ]
+				);
+				deepUnstrictEqual({ "a": 1 }, { "a": "1" }, "property types not equal");
+
+				var cycle = {};
+				cycle.cycle = cycle;
+				deepUnstrictEqual(cycle, cycle);
+
+				var cycle1 = {}, cycle2 = {};
+				cycle1.a = cycle2;
+				cycle2.a = cycle1;
+				deepUnstrictEqual(cycle1, cycle2);
+
+				var c1 = {}, c2 = {}, c3 = {};
+				c1.a = c2;
+				c2.a = c3;
+				c3.a = c1;
+				deepUnstrictEqual(c1.a.a.a, c1);
+				deepUnstrictEqual(c2.a.a.a, c2);
+				deepUnstrictEqual(c3.a.a.a, c3);
+
+				var arr_cycle = [];
+				arr_cycle.push(arr_cycle);
+				deepUnstrictEqual(arr_cycle[0], arr_cycle);
+				arr_cycle.push(arr_cycle);
+				deepUnstrictEqual(arr_cycle[1], arr_cycle);
+
+				var c = [];
+				c.push({ "c": c });
+				deepUnstrictEqual(c[0].c, c);
+				err(void() { deepUnstrictEqual(c[0].c[0], c, "not a cycle"); }, "not a cycle");
+				deepUnstrictEqual(c[0].c[0].c, c);
+				var o = {};
+				o.o = [ o ];
+				deepUnstrictEqual(o.o[0], o);
+				err(void() { deepUnstrictEqual(o.o[0].o, o, "not a cycle"); }, "not a cycle");
+				deepUnstrictEqual(o.o[0].o[0], o);
+
+				var x = { y: new Date() };
+				deepUnstrictEqual(x, x);
+
+				var re = /abc/;
+				deepUnstrictEqual(re, re);
+
+				deepUnstrictEqual(1, new Externals.JS.Number(1));
+				err(void() { deepUnstrictEqual(1, new Externals.JS.Number(0)); }, defaultAssertError);
+				deepUnstrictEqual(true, new Externals.JS.Boolean(true));
+				err(void() { deepUnstrictEqual(true, new Externals.JS.Boolean(false)); }, defaultAssertError);
+				deepUnstrictEqual("abc", new Externals.JS.String("abc"));
+				err(void() { deepUnstrictEqual("abc", new Externals.JS.String("")); }, defaultAssertError);
+
+				deepUnstrictEqual(null, undefined);
+
+				err(void() { deepUnstrictEqual(1, 2); }, defaultAssertError);
+
+				err(void() { deepUnstrictEqual([ 1, 2, 3 ], [ 1, 2 ]); }, defaultAssertError);
+				err(void() { deepUnstrictEqual([ 1, 2 ], [ 1, 2, 3 ]); }, defaultAssertError);
+				err(void() { deepUnstrictEqual([ 1, 2 ], [ 2, 1 ]); }, defaultAssertError);
+				err(void() { deepUnstrictEqual([ 1, 2, undefined ], [ 1, 2 ]); }, defaultAssertError);
+				err(void() { deepUnstrictEqual([ 1, 2, 3 ], { 0: 1, 1: 2, 2: 3 }); }, defaultAssertError);
+				err(void() { deepUnstrictEqual([ 1, 2, [ 3, 4 ] ], [ 1, 2, [ 4, 3 ] ]); }, defaultAssertError);
+
+				deepUnstrictEqual(/abc/, /abc/);
+				deepUnstrictEqual(/(?:)/, /(?:)/);
+				err(void() { deepUnstrictEqual(/abc/, /.+/); }, defaultAssertError);
+
+				deepUnstrictEqual(new Date(), new Date());
+				deepUnstrictEqual(new Date("2011-03-31"), new Date("2011-03-31"));
+				err(void() { deepUnstrictEqual(1234, new Date(1234)); }, defaultAssertError);
+				err(void() { deepUnstrictEqual(new Date(1234), 1234); }, defaultAssertError);
+				err(void() { deepUnstrictEqual(new Date("2011-03-31"), new Date("2011-03-30")); }, defaultAssertError);
+
+				err(void() { deepUnstrictEqual({ "a": "b" }, {}); }, defaultAssertError);
+				err(void() { deepUnstrictEqual({ "a": "b" }, { "a": "c" }, "properties not equal"); }, "properties not equal");
+				err(void() { deepUnstrictEqual({ "a": { "b" : "b" } }, { "a": { "b": "c" } }, "deep properties not equal"); }, "deep properties not equal");
+				err(void() { deepUnstrictEqual({ "a": { "b" : [ 1, 2, 3 ] } }, { "a": { "b": [ 1, 2 ] } }, "deep properties not equal"); }, "deep properties not equal");
+				err(void() { deepUnstrictEqual({ "a": { "b" : [ 1, 2, 3 ] } }, { "a": { "b": [ 1, 2, 4 ] } }, "deep properties not equal"); }, "deep properties not equal");
+
+				function foo(){}
+				function bar(){}
+
+				deepUnstrictEqual(foo, foo);
+				err(void() { deepUnstrictEqual(foo, bar); }, defaultAssertError);
+			});
+			test("notEqual", void() {
+				notEqual(1, 0);
+				notEqual(true, false);
+				notEqual("a", "A");
+				notEqual("abc", "ABC");
+
+				notEqual(1, 0, "error message");
+
+				err(void() { notEqual(0, 0); }, defaultAssertError);
+				err(void() { notEqual(10, 10); }, defaultAssertError);
+				err(void() { notEqual(true, true); }, defaultAssertError);
+				err(void() { notEqual("", ""); }, defaultAssertError);
+				err(void() { notEqual("abc", "abc"); }, defaultAssertError);
+				err(void() { notEqual("abc", "abc", "error message"); }, "error message");
+			});
+			test("notUnstrictEqual", void() {
+				notUnstrictEqual(1, 0);
+				notUnstrictEqual(true, false);
+				notUnstrictEqual("a", "A");
+				notUnstrictEqual("abc", "ABC");
+
+				notUnstrictEqual(1, 0, "error message");
+
+				err(void() { notUnstrictEqual(0, 0); }, defaultAssertError);
+				err(void() { notUnstrictEqual(0, false); }, defaultAssertError);
+				err(void() { notUnstrictEqual(10, 10); }, defaultAssertError);
+				err(void() { notUnstrictEqual(10, "10"); }, defaultAssertError);
+				err(void() { notUnstrictEqual(true, true); }, defaultAssertError);
+				err(void() { notUnstrictEqual(true, 1); }, defaultAssertError);
+				err(void() { notUnstrictEqual("", ""); }, defaultAssertError);
+				err(void() { notUnstrictEqual("abc", "abc"); }, defaultAssertError);
+				err(void() { notUnstrictEqual("abc", "abc", "error message"); }, "error message");
+			});
+			test("notDeepEqual", void() {
+				err(void() { notDeepEqual(0, 0); }, defaultAssertError);
+				err(void() { notDeepEqual(1, 1); }, defaultAssertError);
+				err(void() { notDeepEqual(-100, -100, "error message"); }, "error message");
+				err(void() { notDeepEqual(true, true); }, defaultAssertError);
+				err(void() { notDeepEqual(false, false); }, defaultAssertError);
+				err(void() { notDeepEqual("", ""); }, defaultAssertError);
+				err(void() { notDeepEqual("abc", "abc"); }, defaultAssertError);
+				err(void() { notDeepEqual(undefined, undefined); }, defaultAssertError);
+				err(void() { notDeepEqual(null, null); }, defaultAssertError);
+
+				err(void() { notDeepEqual({}, {}); }, defaultAssertError);
+				err(void() { notDeepEqual({ "a": "b" }, { "a": "b" }); }, defaultAssertError);
+				err(void() { notDeepEqual({ "a": "b", "c": 100 }, { "a": "b", "c": 100 }); }, defaultAssertError);
+				err(void() { notDeepEqual({ "c": 100, "a": "b" }, { "a": "b", "c": 100 }); }, defaultAssertError);
+				err(
+					void() {
+						notDeepEqual(
+							{ "a": "b", "c": { "d": 100, "e": "e" } },
+							{ "a": "b", "c": { "d": 100, "e": "e" } }
+						);
+					},
+					defaultAssertError
+				);
+				err(
+					void() {
+						notDeepEqual(
+							{ "a": "b", "c": { "e": "e", "d": 100 } },
+							{ "a": "b", "c": { "d": 100, "e": "e" } }
+						);
+					},
+					defaultAssertError
+				);
+				err(void() { notDeepEqual([], []); }, defaultAssertError);
+				err(void() { notDeepEqual([ 1, 2, 3 ], [ 1, 2, 3 ]); }, defaultAssertError);
+				err(void() { notDeepEqual([ 1, 2, [ 3, 4 ] ], [ 1, 2, [ 3, 4 ] ]); }, defaultAssertError);
+				err(void() { notDeepEqual([ { "a": "b", "c": 100 } ], [ { "a": "b", "c": 100 } ]); }, defaultAssertError);
+				err(
+					void() {
+						notDeepEqual(
+							[ { "a": "b", "c": { "d": 100, "e": "e" } }, {}, { "f": true } ],
+							[ { "a": "b", "c": { "d": 100, "e": "e" } }, {}, { "f": true } ]
+						);
+					},
+					defaultAssertError
+				);
+
+				var cycle = {};
+				cycle.cycle = cycle;
+				err(void() { notDeepEqual(cycle, cycle); }, defaultAssertError);
+
+				var cycle1 = {}, cycle2 = {};
+				cycle1.a = cycle2;
+				cycle2.a = cycle1;
+				err(void() { notDeepEqual(cycle1, cycle2); }, defaultAssertError);
+
+				var c1 = {}, c2 = {}, c3 = {};
+				c1.a = c2;
+				c2.a = c3;
+				c3.a = c1;
+				err(void() { notDeepEqual(c1.a.a.a, c1); }, defaultAssertError);
+				err(void() { notDeepEqual(c2.a.a.a, c2); }, defaultAssertError);
+				err(void() { notDeepEqual(c3.a.a.a, c3); }, defaultAssertError);
+
+				var arr_cycle = [];
+				arr_cycle.push(arr_cycle);
+				err(void() { notDeepEqual(arr_cycle[0], arr_cycle); }, defaultAssertError);
+				arr_cycle.push(arr_cycle);
+				err(void() { notDeepEqual(arr_cycle[1], arr_cycle); }, defaultAssertError);
+
+				var c = [];
+				c.push({ "c": c });
+				err(void() { notDeepEqual(c[0].c, c); }, defaultAssertError);
+				notDeepEqual(c[0].c[0], c, "not a cycle");
+				err(void() { notDeepEqual(c[0].c[0].c, c); }, defaultAssertError);
+				var o = {};
+				o.o = [ o ];
+				err(void() { notDeepEqual(o.o[0], o); }, defaultAssertError);
+				notDeepEqual(o.o[0].o, o, "not a cycle");
+				err(void() { notDeepEqual(o.o[0].o[0], o); }, defaultAssertError);
+
+				var x = { y: new Date() };
+				err(void() { notDeepEqual(x, x); }, defaultAssertError);
+
+				var re = /abc/;
+				err(void() { notDeepEqual(re, re); }, defaultAssertError);
+
+				notDeepEqual(1, new Externals.JS.Number(1));
+				notDeepEqual(true, new Externals.JS.Boolean(true));
+				notDeepEqual("abc", new Externals.JS.String("abc"));
+
+				notDeepEqual(null, undefined);
+				notDeepEqual(1, 2);
+
+				notDeepEqual([ 1, 2, 3 ], [ 1, 2 ]);
+				notDeepEqual([ 1, 2 ], [ 1, 2, 3 ]);
+				notDeepEqual([ 1, 2 ], [ 2, 1 ]);
+				notDeepEqual([ 1, 2, undefined ], [ 1, 2 ]);
+				notDeepEqual([ 1, 2, 3 ], { 0: 1, 1: 2, 2: 3 });
+				notDeepEqual([ 1, 2, 3 ], [ 1, 2, [ 3 ] ]);
+				notDeepEqual([ 1, 2, [ 3, 4 ] ], [ 1, 2, [ 4, 3 ] ]);
+
+				err(void() { notDeepEqual(/abc/, /abc/); }, defaultAssertError);
+				err(void() { notDeepEqual(/(?:)/, /(?:)/); }, defaultAssertError);
+				notDeepEqual(/abc/, /.+/);
+
+				err(void() { notDeepEqual(new Date(), new Date()); }, defaultAssertError);
+				err(void() { notDeepEqual(new Date("2011-03-31"), new Date("2011-03-31")); }, defaultAssertError);
+				notDeepEqual(1234, new Date(1234));
+				notDeepEqual(new Date(1234), 1234);
+				notDeepEqual(new Date("2011-03-31"), new Date("2011-03-30"));
+
+				notDeepEqual({ "a": "b" }, {});
+				notDeepEqual({ "a": 1 }, { "a": "1" }, "property types not equal");
+				notDeepEqual({ "a": "b" }, { "a": "c" }, "properties not equal");
+				notDeepEqual({ "a": undefined }, { "a": null }, "properties not equal");
+				notDeepEqual({ "a": { "b" : "b" } }, { "a": { "b": "c" } }, "deep properties not equal");
+				notDeepEqual({ "a": { "b" : [ 1, 2, 3 ] } }, { "a": { "b": [ 1, 2 ] } }, "deep properties not equal");
+				notDeepEqual({ "a": { "b" : [ 1, 2, 3 ] } }, { "a": { "b": [ 1, 2, 4 ] } }, "deep properties not equal");
+
+				function foo(){}
+				function bar(){}
+
+				err(void() { notDeepEqual(foo, foo); }, defaultAssertError);
+				notDeepEqual(foo, bar);
+			});
+			test("notDeepUnstrictEqual", void() {
+				err(void() { notDeepUnstrictEqual(0, 0); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual(1, 1); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual(-100, -100, "error message"); }, "error message");
+				err(void() { notDeepUnstrictEqual(true, true); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual(false, false); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual("", ""); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual("abc", "abc"); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual(undefined, undefined); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual(null, null); }, defaultAssertError);
+
+				err(void() { notDeepUnstrictEqual(3, [ 3 ]); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual([ 1, 2, 3 ], [ 1, 2, [ 3 ] ]); }, defaultAssertError);
+
+				err(void() { notDeepUnstrictEqual({ "a": undefined }, { "a": null }); }, defaultAssertError);
+
+				err(void() { notDeepUnstrictEqual({}, {}); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual({ "a": "b" }, { "a": "b" }); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual({ "a": "b", "c": 100 }, { "a": "b", "c": 100 }); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual({ "c": 100, "a": "b" }, { "a": "b", "c": 100 }); }, defaultAssertError);
+				err(
+					void() {
+						notDeepUnstrictEqual(
+							{ "a": "b", "c": { "d": 100, "e": "e" } },
+							{ "a": "b", "c": { "d": 100, "e": "e" } }
+						);
+					},
+					defaultAssertError
+				);
+				err(
+					void() {
+						notDeepUnstrictEqual(
+							{ "a": "b", "c": { "e": "e", "d": 100 } },
+							{ "a": "b", "c": { "d": 100, "e": "e" } }
+						);
+					},
+					defaultAssertError
+				);
+				err(void() { notDeepUnstrictEqual([], []); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual([ 1, 2, 3 ], [ 1, 2, 3 ]); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual([ 1, 2, [ 3, 4 ] ], [ 1, 2, [ 3, 4 ] ]); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual([ { "a": "b", "c": 100 } ], [ { "a": "b", "c": 100 } ]); }, defaultAssertError);
+				err(
+					void() {
+						notDeepUnstrictEqual(
+							[ { "a": "b", "c": { "d": 100, "e": "e" } }, {}, { "f": true } ],
+							[ { "a": "b", "c": { "d": 100, "e": "e" } }, {}, { "f": true } ]
+						);
+					},
+					defaultAssertError
+				);
+				err(void() { notDeepUnstrictEqual({ "a": 1 }, { "a": "1" }, "property types not equal"); }, "property types not equal");
+
+				var cycle = {};
+				cycle.cycle = cycle;
+				err(void() { notDeepUnstrictEqual(cycle, cycle); }, defaultAssertError);
+
+				var cycle1 = {}, cycle2 = {};
+				cycle1.a = cycle2;
+				cycle2.a = cycle1;
+				err(void() { notDeepUnstrictEqual(cycle1, cycle2); }, defaultAssertError);
+
+				var c1 = {}, c2 = {}, c3 = {};
+				c1.a = c2;
+				c2.a = c3;
+				c3.a = c1;
+				err(void() { notDeepUnstrictEqual(c1.a.a.a, c1); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual(c2.a.a.a, c2); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual(c3.a.a.a, c3); }, defaultAssertError);
+
+				var arr_cycle = [];
+				arr_cycle.push(arr_cycle);
+				err(void() { notDeepUnstrictEqual(arr_cycle[0], arr_cycle); }, defaultAssertError);
+				arr_cycle.push(arr_cycle);
+				err(void() { notDeepUnstrictEqual(arr_cycle[1], arr_cycle); }, defaultAssertError);
+
+				var c = [];
+				c.push({ "c": c });
+				err(void() { notDeepUnstrictEqual(c[0].c, c); }, defaultAssertError);
+				notDeepUnstrictEqual(c[0].c[0], c, "not a cycle");
+				err(void() { notDeepUnstrictEqual(c[0].c[0].c, c); }, defaultAssertError);
+				var o = {};
+				o.o = [ o ];
+				err(void() { notDeepUnstrictEqual(o.o[0], o); }, defaultAssertError);
+				notDeepUnstrictEqual(o.o[0].o, o, "not a cycle");
+				err(void() { notDeepUnstrictEqual(o.o[0].o[0], o); }, defaultAssertError);
+
+				var x = { y: new Date() };
+				err(void() { notDeepUnstrictEqual(x, x); }, defaultAssertError);
+
+				var re = /abc/;
+				err(void() { notDeepUnstrictEqual(re, re); }, defaultAssertError);
+
+				err(void() { notDeepUnstrictEqual(1, new Externals.JS.Number(1)); }, defaultAssertError);
+				notDeepUnstrictEqual(1, new Externals.JS.Number(0));
+				err(void() { notDeepUnstrictEqual(true, new Externals.JS.Boolean(true)); }, defaultAssertError);
+				notDeepUnstrictEqual(true, new Externals.JS.Boolean(false));
+				err(void() { notDeepUnstrictEqual("abc", new Externals.JS.String("abc")); }, defaultAssertError);
+				notDeepUnstrictEqual("abc", new Externals.JS.String(""));
+
+				err(void() { notDeepUnstrictEqual(null, undefined); }, defaultAssertError);
+
+				notDeepUnstrictEqual(1, 2);
+
+				notDeepUnstrictEqual([ 1, 2, 3 ], [ 1, 2 ]);
+				notDeepUnstrictEqual([ 1, 2 ], [ 1, 2, 3 ]);
+				notDeepUnstrictEqual([ 1, 2 ], [ 2, 1 ]);
+				notDeepUnstrictEqual([ 1, 2, undefined ], [ 1, 2 ]);
+				notDeepUnstrictEqual([ 1, 2, 3 ], { 0: 1, 1: 2, 2: 3 });
+				notDeepUnstrictEqual([ 1, 2, [ 3, 4 ] ], [ 1, 2, [ 4, 3 ] ]);
+
+				err(void() { notDeepUnstrictEqual(/abc/, /abc/); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual(/(?:)/, /(?:)/); }, defaultAssertError);
+				notDeepUnstrictEqual(/abc/, /.+/);
+
+				err(void() { notDeepUnstrictEqual(new Date(), new Date()); }, defaultAssertError);
+				err(void() { notDeepUnstrictEqual(new Date("2011-03-31"), new Date("2011-03-31")); }, defaultAssertError);
+				notDeepUnstrictEqual(1234, new Date(1234));
+				notDeepUnstrictEqual(new Date(1234), 1234);
+				notDeepUnstrictEqual(new Date("2011-03-31"), new Date("2011-03-30"));
+
+				notDeepUnstrictEqual({ "a": "b" }, {});
+				notDeepUnstrictEqual({ "a": "b" }, { "a": "c" }, "properties not equal");
+				notDeepUnstrictEqual({ "a": { "b" : "b" } }, { "a": { "b": "c" } }, "deep properties not equal");
+				notDeepUnstrictEqual({ "a": { "b" : [ 1, 2, 3 ] } }, { "a": { "b": [ 1, 2 ] } }, "deep properties not equal");
+				notDeepUnstrictEqual({ "a": { "b" : [ 1, 2, 3 ] } }, { "a": { "b": [ 1, 2, 4 ] } }, "deep properties not equal");
+
+				function foo(){}
+				function bar(){}
+
+				err(void() { notDeepUnstrictEqual(foo, foo); }, defaultAssertError);
+				notDeepUnstrictEqual(foo, bar);
+			});
+			test("isTrue", void() {
+				Utils.isTrueTest(_isTrue);
+
+				isTrue(0 === 0);
+				isTrue(1 === 1, "Basic equality");
+				err(void() { isTrue(1 === 0); }, defaultAssertError);
+				err(void() { isTrue(1 === 0, "1 does not equal 0"); }, "1 does not equal 0");
+			});
+			test("isFalse", void() {
+				isFalse(false);
+				isFalse(false, "Testing assertion message");
+
+				var x = true;
+				err(void() { isFalse(x); }, defaultAssertError);
+				x = 1;
+				err(void() { isFalse(x); }, defaultAssertError);
+				x = "1";
+				err(void() { isFalse(x); }, defaultAssertError);
+				x = [1];
+				err(void() { isFalse(x); }, defaultAssertError);
+				x = false;
+				isFalse(x);
+				x = 0;
+				isFalse(x);
+				x = "";
+				isFalse(x);
+				x = null;
+				isFalse(x);
+				x = undefined;
+				isFalse(x);
+
+				bool y = false;
+				isFalse(y);
+				y = true;
+				err(void() { isFalse(y, "error message"); }, "error message");
+			});
+			test("isUndefined", void() {
+				isUndefined(undefined);
+				isUndefined(undefined, "error message");
+
+				var x;
+				isUndefined(x);
+				x = undefined;
+				isUndefined(x);
+
+				void foo() {}
+				isUndefined(foo());
+
+				function bar() {}
+				isUndefined(bar());
+
+				err(void() { isUndefined(false); }, defaultAssertError);
+				err(void() { isUndefined(true); }, defaultAssertError);
+				err(void() { isUndefined(null); }, defaultAssertError);
+				err(void() { isUndefined(0); }, defaultAssertError);
+				err(void() { isUndefined(1); }, defaultAssertError);
+				err(void() { isUndefined(""); }, defaultAssertError);
+				err(void() { isUndefined("abc"); }, defaultAssertError);
+
+				err(void() { isUndefined(false, "error message"); }, "error message");
+			});
+			test("isNotUndefined", void() {
+				isNotUndefined(true, "error message");
+				isNotUndefined(true);
+				isNotUndefined(false);
+				isNotUndefined(0);
+				isNotUndefined(1);
+				isNotUndefined(null);
+				isNotUndefined("");
+				isNotUndefined("abc");
+
+				err(void() { isNotUndefined(undefined); }, defaultAssertError);
+				err(void() { isNotUndefined(undefined, "error message"); }, "error message");
+
+				var x;
+				err(void() { isNotUndefined(x); }, defaultAssertError);
+				x = undefined;
+				err(void() { isNotUndefined(x); }, defaultAssertError);
+
+				void foo() {}
+				function bar() {}
+				err(void() { isNotUndefined(foo()); }, defaultAssertError);
+				err(void() { isNotUndefined(bar()); }, defaultAssertError);
+			});
+			test("isNull", void() {
+				isNull(null);
+				isNull(null, "error message");
+
+				var x = null;
+				isNull(x);
+
+				err(void() { isNull(false); }, defaultAssertError);
+				err(void() { isNull(true); }, defaultAssertError);
+				err(void() { isNull(undefined); }, defaultAssertError);
+				err(void() { isNull(0); }, defaultAssertError);
+				err(void() { isNull(1); }, defaultAssertError);
+				err(void() { isNull(""); }, defaultAssertError);
+				err(void() { isNull("abc"); }, defaultAssertError);
+
+				err(void() { isNull(false, "error message"); }, "error message");
+			});
+			test("isNotNull", void() {
+				isNotNull(false);
+				isNotNull(true);
+				isNotNull(undefined);
+				isNotNull(0);
+				isNotNull(1);
+				isNotNull("");
+				isNotNull("abc");
+
+				isNotNull({}, "error message");
+
+				err(void() { isNotNull(null); }, defaultAssertError);
+				err(void() { isNotNull(null, "error message"); }, "error message");
+
+				var x = null;
+				err(void() { isNotNull(x); }, defaultAssertError);
+			});
+			test("isNullOrUndefined", void() {
+				isNullOrUndefined(null);
+				isNullOrUndefined(undefined);
+				isNullOrUndefined(null, "error message");
+				isNullOrUndefined(undefined, "error message");
+
+				var x;
+				isNullOrUndefined(x);
+				x = null;
+				isNullOrUndefined(x);
+				x = undefined;
+				isNullOrUndefined(x);
+
+				err(void() { isNullOrUndefined(0); }, defaultAssertError);
+				err(void() { isNullOrUndefined(1); }, defaultAssertError);
+				err(void() { isNullOrUndefined(true); }, defaultAssertError);
+				err(void() { isNullOrUndefined(false); }, defaultAssertError);
+				err(void() { isNullOrUndefined(""); }, defaultAssertError);
+				err(void() { isNullOrUndefined("abc"); }, defaultAssertError);
+
+				err(void() { isNullOrUndefined({}, "error message"); }, "error message");
+			});
+			test("isNotNullOrUndefined", void() {
+				isNotNullOrUndefined(0);
+				isNotNullOrUndefined(1);
+				isNotNullOrUndefined(true);
+				isNotNullOrUndefined(false);
+				isNotNullOrUndefined("");
+				isNotNullOrUndefined("abc");
+
+				isNotNullOrUndefined({}, "error message");
+
+				err(void() { isNotNullOrUndefined(null); }, defaultAssertError);
+				err(void() { isNotNullOrUndefined(undefined); }, defaultAssertError);
+				err(void() { isNotNullOrUndefined(null, "error message"); }, "error message");
+				err(void() { isNotNullOrUndefined(undefined, "error message"); }, "error message");
+
+				var x;
+				err(void() { isNotNullOrUndefined(x); }, defaultAssertError);
+				x = null;
+				err(void() { isNotNullOrUndefined(x); }, defaultAssertError);
+				x = undefined;
+				err(void() { isNotNullOrUndefined(x); }, defaultAssertError);
+			});
+			test("isNaN", void() {
+				Assert.isNaN(Externals.JS.NaN);
+				Assert.isNaN(Externals.JS.NaN, "testing assert message");
+				err(void() { Assert.isNaN(1); }, defaultAssertError);
+				err(void() { Assert.isNaN(1, "Not NaN"); }, "Not NaN");
+			});
+			test("isNotNaN", void() {
+				Assert.isNotNaN(1);
+				Assert.isNotNaN(1, "testing assert message");
+				err(void() { Assert.isNotNaN(Externals.JS.NaN); }, defaultAssertError);
+				err(void() { Assert.isNotNaN(Externals.JS.NaN, "It actually is NaN"); }, "It actually is NaN");
+			});
+			test("isEmpty", void() {
+				isEmpty("");
+				isEmpty("", "testing assert message");
+				err(void() { isEmpty("abc"); }, defaultAssertError);
+				err(void() { isEmpty("abc", "String not empty"); }, "String not empty");
+
+				var s1 = "", s2 = "abc";
+				isEmpty(s1);
+				isEmpty(s1, "testing assert message");
+				err(void() { isEmpty(s2); }, defaultAssertError);
+				err(void() { isEmpty(s2, "External string not empty"); }, "External string not empty");
+
+				var a1 = [], a2 = [ 1 ], a3 = [[]];
+				isEmpty(a1);
+				isEmpty(a1, "error message");
+				err(void() { isEmpty(a2); }, defaultAssertError);
+				err(void() { isEmpty(a3); }, defaultAssertError);
+				err(void() { isEmpty(a2, "External array not empty"); }, "External array not empty");
+				err(void() { isEmpty(a3, "External array not empty"); }, "External array not empty");
+
+				isEmpty({});
+				isEmpty({}, "error message");
+				err(void() { isEmpty({ a: 1 }); }, defaultAssertError);
+				err(void() { isEmpty({ a: 1 }, "External object not empty"); }, "External object not empty");
+			});
+			test("isNotEmpty", void() {
+				isNotEmpty("abc");
+				isNotEmpty("abc", "testing assert message");
+				err(void() { isNotEmpty(""); }, defaultAssertError);
+				err(void() { isNotEmpty("", "String is empty"); }, "String is empty");
+
+				var s1 = "", s2 = "abc";
+				isNotEmpty(s2);
+				isNotEmpty(s2, "error message");
+				err(void() { isNotEmpty(s1); }, defaultAssertError);
+				err(void() { isNotEmpty(s1, "External string is empty"); }, "External string is empty");
+
+				var a1 = [], a2 = [ 1 ], a3 = [[]];
+				isNotEmpty(a2);
+				isNotEmpty(a2, "error message");
+				isNotEmpty(a3);
+				isNotEmpty(a3, "error message");
+				err(void() { isNotEmpty(a1); }, defaultAssertError);
+				err(void() { isNotEmpty(a1, "External array is empty"); }, "External array is empty");
+			});
+			test("fail", void() {
+				err(void() { fail(); }, defaultAssertError);
+				err(void() { fail("error message"); }, "error message");
+			});
+			test("throws", void() {
+				Assert.throws(void() { throw new Error(); });
+				Assert.throws(void() { throw new Error("error message"); }, "error message");
+				Assert.throws(void() { throw new ReferenceError(); }, ReferenceError);
+				Assert.throws(void() { throw new ReferenceError("error message"); }, ReferenceError, "error message");
+
+				err(void() { Assert.throws(void(){}); }, defaultAssertError);
+				err(void() { Assert.throws(void(){}, "error msg"); }, "error msg");
+				err(void() { Assert.throws(void(){}, ReferenceError); }, defaultAssertError);
+				err(void() { Assert.throws(void(){}, ReferenceError, "error msg"); }, "error msg");
+			});
+			test("doesNotThrow", void() {
+				Assert.doesNotThrow(void(){});
+				Assert.doesNotThrow(void(){}, "error msg");
+				Assert.doesNotThrow(void(){}, ReferenceError);
+				Assert.doesNotThrow(void(){}, ReferenceError, "error msg");
+				Assert.doesNotThrow(void(){ throw new Error(); }, ReferenceError);
+				Assert.doesNotThrow(void(){ throw new Error(); }, ReferenceError, "error message");
+
+				err(void() { Assert.doesNotThrow(void() { throw new Error(); }); }, defaultAssertError);
+				err(void() { Assert.doesNotThrow(void() { throw new Error("error message"); }, "error message"); }, "error message");
+				err(void() { Assert.doesNotThrow(void() { throw new ReferenceError(); }, ReferenceError); }, defaultAssertError);
+				err(void() { Assert.doesNotThrow(void() { throw new ReferenceError("error message"); }, ReferenceError, "error message"); }, "error message");
+			});
+		});
+	}
+}

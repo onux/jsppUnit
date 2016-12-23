@@ -1,0 +1,59 @@
+import Vendor.JSPPUnit;
+import Externals.JS;
+
+/**
+ * Tests for the JSPPUnit library.
+ */
+module Vendor.JSPPUnit.Test
+{
+	/**
+	 * Queues the js++Unit library's tests for the test runner.
+	 */
+	public void queue() {
+		suite("Vendor.JSPPUnit", void() {
+			int counter = 0;
+			
+			test("test - no exception results in test pass", void() {
+				++counter;
+				if (counter != 1) {
+					throw new Error();
+				}
+			});
+			test("test - exception results in test failure", void() {
+				try {
+					throw new ReferenceError();
+				}
+				catch(e) {
+					if (!(e instanceof ReferenceError)) {
+						throw e;
+					}
+				}
+			});
+			test("skip - does nothing", void() {
+				skip("", void() { ++counter; });
+
+				if (counter != 1) {
+					throw new Error();
+				}
+			});
+			test("throws - exception results in test pass", void() {
+				throws("", void() {
+					++counter;
+					throw new ReferenceError();
+					++counter;
+				});
+
+				if (counter != 2) {
+					throw new Error();
+				}
+			});
+			test("throws - no exception results in test failure", void() {
+				throws("", void() { ++counter; });
+
+				if (counter != 2) {
+					throw new Error(counter);
+				}
+			});
+		});
+	}
+}

@@ -1,0 +1,63 @@
+import Externals.JS;
+
+/**
+ * Provides utilities to use for testing the Vendor.JSPPUnit.Assert library.
+ */
+module Vendor.JSPPUnit.Assert.Test.Utils
+{
+	/**
+	 * Utility function to expect an assertion to fail with a specified error
+	 * message.
+	 *
+	 * @param func The function to execute containing the assertion.
+	 * @param msg The error message to expect when the assertion fails.
+	 */
+	public void err(void() func, string msg) {
+		try {
+			func();
+			throw new Error("Expected error but received none"); //throw new System.Errors.AssertError();
+		}
+		/*catch(System.Errors.AssertError e) {
+		}*/
+		catch(e) {
+			if (e.message !== msg) {
+				throw e;
+			}
+		}
+	}
+	/**
+	 * Utility function to avoid duplicating tests for aliases of
+	 * 'Vendor.JSPPUnit.Assert.isTrue'
+	 *
+	 * @param assertion The alias of 'Vendor.JSPPUnit.Assert.isTrue' to test.
+	 */
+	public void isTrueTest(void(bool) assertion) {
+		string defaultAssertError = "Assertion error";
+		
+		assertion(true);
+
+		var x = true;
+		assertion(x);
+		x = 1;
+		assertion(x);
+		x = "1";
+		assertion(x);
+		x = [1];
+		assertion(x);
+		x = false;
+		err(void() { assertion(x); }, defaultAssertError);
+		x = 0;
+		err(void() { assertion(x); }, defaultAssertError);
+		x = "";
+		err(void() { assertion(x); }, defaultAssertError);
+		x = null;
+		err(void() { assertion(x); }, defaultAssertError);
+		x = undefined;
+		err(void() { assertion(x); }, defaultAssertError);
+
+		bool y = true;
+		assertion(y);
+		y = false;
+		err(void() { assertion(x); }, defaultAssertError);
+	}
+}

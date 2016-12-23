@@ -1,0 +1,711 @@
+import Externals.JS;
+
+/**
+ * JSPPUnit.Assert is an assertion library providing common assertion functions.
+ */
+module Vendor.JSPPUnit.Assert
+{
+	/**
+	 * @overload ok
+	 * 
+	 * Asserts that a condition evaluates to true. Alias for 'isTrue'.
+	 */
+	/**
+	 * @param condition The condition to test.
+	 */
+	public void ok(bool condition) {
+		return isTrue(condition);
+	}
+	/**
+	 * @param condition The condition to test.
+	 * @param message The message for the assertion error if the condition is not true.
+	 */
+	public void ok(bool condition, string message) {
+		return isTrue(condition, message);
+	}
+
+	/**
+	 * @overload equal
+	 * 
+	 * Asserts that two values are strictly equal.
+	 */
+	/**
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 */
+	public void equal(external a, external b) {
+		if (a !== b) {
+			throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 * @param message The message for the assertion error if the values are not strictly equal.
+	 */
+	public void equal(external a, external b, string message) {
+		if (a !== b) {
+			throw new Error(message); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @overload unstrictEqual
+	 * 
+	 * Asserts that two values are equal without using strict equality.
+	 */
+	/**
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 */
+	public void unstrictEqual(external a, external b) {
+		if (a != b) {
+			throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 * @param message The message for the assertion error if the values are not equal.
+	 */
+	public void unstrictEqual(external a, external b, string message) {
+		if (a != b) {
+			throw new Error(message); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @overload notEqual
+	 * 
+	 * Asserts that two values are strictly not equal.
+	 */
+	/**
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 */
+	public void notEqual(external a, external b) {
+		if (a === b) {
+			throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 * @param message The message for the assertion error if the values are strictly equal.
+	 */
+	public void notEqual(external a, external b, string message) {
+		if (a === b) {
+			throw new Error(message); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @overload notUnstrictEqual
+	 * 
+	 * Asserts that two values are not equal without using strict equality.
+	 */
+	/**
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 */
+	public void notUnstrictEqual(external a, external b) {
+		if (a == b) {
+			throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 * @param message The message for the assertion error if the values are equal.
+	 */
+	public void notUnstrictEqual(external a, external b, string message) {
+		if (a == b) {
+			throw new Error(message); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @overload deepEqual
+	 * 
+	 * Asserts that two values are deeply strictly equal (via recursion).
+	 */
+	/**
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 */
+	public void deepEqual(external a, external b) {
+		deepEqual(a, b, "Assertion error");
+	}
+	/**
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 * @param message The message for the assertion error if the values are not deeply strictly equal.
+	 */
+	public void deepEqual(external a, external b, string message) {
+		bool equal = deepCompare(a, b, operator_equal);
+
+		if (!equal) {
+			throw new Error(message); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @overload deepUnstrictEqual
+	 * 
+	 * Asserts that two values are deeply equal (via recursion) without using strict equality.
+	 */
+	/**
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 */
+	public void deepUnstrictEqual(external a, external b) {
+		deepUnstrictEqual(a, b, "Assertion error");
+	}
+	/**
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 * @param message The message for the assertion error if the values are not deeply equal.
+	 */
+	public void deepUnstrictEqual(external a, external b, string message) {
+		bool equal = deepCompare(a, b, operator_unstrictEqual);
+
+		if (!equal) {
+			throw new Error(message); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @overload notDeepEqual
+	 * 
+	 * Asserts that two values are not deeply strictly equal (via recursion).
+	 */
+	/**
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 */
+	public void notDeepEqual(external a, external b) {
+		notDeepEqual(a, b, "Assertion error");
+	}
+	/**
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 * @param message The message for the assertion error if the values are deeply strictly equal.
+	 */
+	public void notDeepEqual(external a, external b, string message) {
+		bool equal = deepCompare(a, b, operator_equal);
+
+		if (equal) {
+			throw new Error(message); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @overload notDeepUnstrictEqual
+	 * 
+	 * Asserts that two values are not deeply equal (via recursion) without using strict equality.
+	 */
+	/**
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 */
+	public void notDeepUnstrictEqual(external a, external b) {
+		notDeepUnstrictEqual(a, b, "Assertion error");
+	}
+	/**
+	 * @param a The first value to compare.
+	 * @param b The second value to compare.
+	 * @param message The message for the assertion error if the values are deeply equal.
+	 */
+	public void notDeepUnstrictEqual(external a, external b, string message) {
+		bool equal = deepCompare(a, b, operator_unstrictEqual);
+
+		if (equal) {
+			throw new Error(message); //throw new System.Errors.AssertError();
+		}
+	}
+
+	/**
+	 * @overload isTrue
+	 * 
+	 * Asserts that a condition evaluates to true.
+	 */
+	/**
+	 * @param condition The condition to test.
+	 */
+	public void isTrue(bool condition) {
+		if (!condition) {
+			throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @param condition The condition to test.
+	 * @param message The message for the assertion error if the condition is not true.
+	 */
+	public void isTrue(bool condition, string message) {
+		if (!condition) {
+			throw new Error(message); //throw new System.Errors.AssertError(message);
+		}
+	}
+	/**
+	 * @overload isFalse
+	 * 
+	 * Asserts that a condition evaluates to false.
+	 */
+	/**
+	 * @param condition The condition to test.
+	 */
+	public void isFalse(bool condition) {
+		if (condition) {
+			throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @param condition The condition to test.
+	 * @param message The message for the assertion error if the condition is not false.
+	 */
+	public void isFalse(bool condition, string message) {
+		if (condition) {
+			throw new Error(message); //throw new System.Errors.AssertError(message);
+		}
+	}
+
+	/**
+	 * @overload isUndefined
+	 * 
+	 * Asserts that a value evaluates strictly to undefined.
+	 */
+	/**
+	 * @param value The value to test.
+	 */
+	public void isUndefined(external value) {
+		if (value !== undefined) {
+			throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @param value The value to test.
+	 * @param message The message for the assertion error if the value is not strictly undefined.
+	 */
+	public void isUndefined(external value, string message) {
+		if (value !== undefined) {
+			throw new Error(message); //throw new System.Errors.AssertError(message);
+		}
+	}
+	/**
+	 * @overload isNotUndefined
+	 * 
+	 * Asserts that a value evaluates strictly to any value other than undefined.
+	 */
+	/**
+	 * @param value The value to test.
+	 */
+	public void isNotUndefined(external value) {
+		if (value === undefined) {
+			throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @param value The value to test.
+	 * @param message The message for the assertion error if the value evaluates strictly to undefined.
+	 */
+	public void isNotUndefined(external value, string message) {
+		if (value === undefined) {
+			throw new Error(message); //throw new System.Errors.AssertError(message);
+		}
+	}
+	/**
+	 * @overload isNull
+	 * 
+	 * Asserts that a value evaluates strictly to null.
+	 */
+	/**
+	 * @param value The value to test.
+	 */
+	public void isNull(external value) {
+		if (value !== null) {
+			throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @param value The value to test.
+	 * @param message The message for the assertion error if the value is not strictly null.
+	 */
+	public void isNull(external value, string message) {
+		if (value !== null) {
+			throw new Error(message); //throw new System.Errors.AssertError(message);
+		}
+	}
+	/**
+	 * @overload isNotNull
+	 * 
+	 * Asserts that a value evaluates strictly to any value other than null.
+	 */
+	/**
+	 * @param value The value to test.
+	 */
+	public void isNotNull(external value) {
+		if (value === null) {
+			throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @param value The value to test.
+	 * @param message The message for the assertion error if the value evaluates strictly to null.
+	 */
+	public void isNotNull(external value, string message) {
+		if (value === null) {
+			throw new Error(message); //throw new System.Errors.AssertError(message);
+		}
+	}
+	/**
+	 * @overload isNullOrUndefined
+	 * 
+	 * Asserts that a value evaluates to null or undefined.
+	 */
+	/**
+	 * @param value The value to test.
+	 */
+	public void isNullOrUndefined(external value) {
+		if (value != null) {
+			throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @param value The value to test.
+	 * @param message The message for the assertion error if the value is not null or undefined.
+	 */
+	public void isNullOrUndefined(external value, string message) {
+		if (value != null) {
+			throw new Error(message); //throw new System.Errors.AssertError(message);
+		}
+	}
+	/**
+	 * @overload isNotNullOrUndefined
+	 * 
+	 * Asserts that a value evaluates any value other than null or undefined.
+	 */
+	/**
+	 * @param value The value to test.
+	 */
+	public void isNotNullOrUndefined(external value) {
+		if (value == null) {
+			throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @param value The value to test.
+	 * @param message The message for the assertion error if the value evaluates to null or undefined.
+	 */
+	public void isNotNullOrUndefined(external value, string message) {
+		if (value == null) {
+			throw new Error(message); //throw new System.Errors.AssertError(message);
+		}
+	}
+
+	/**
+	 * @overload isNaN
+	 * 
+	 * Asserts that a value evaluates to the IEEE-754 NaN (Not a Number) value.
+	 */
+	/**
+	 * @param value The value to test.
+	 */
+	public void isNaN(double value) {
+		if (!Externals.JS.isNaN(value)) {
+			throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @param value The value to test.
+	 * @param message The message for the assertion error if the value is not NaN.
+	 */
+	public void isNaN(double value, string message) {
+		if (!Externals.JS.isNaN(value)) {
+			throw new Error(message); //throw new System.Errors.AssertError(message);
+		}
+	}
+	/**
+	 * @overload isNotNaN
+	 * 
+	 * Asserts that a value evaluates to anything other than the IEEE-754 NaN (Not a Number) value.
+	 */
+	/**
+	 * @param value The value to test.
+	 */
+	public void isNotNaN(double value) {
+		if (Externals.JS.isNaN(value)) {
+			throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * @param value The value to test.
+	 * @param message The message for the assertion error if the value is NaN.
+	 */
+	public void isNotNaN(double value, string message) {
+		if (Externals.JS.isNaN(value)) {
+			throw new Error(message); //throw new System.Errors.AssertError(message);
+		}
+	}
+
+	/**
+	 * Asserts that a string value is an empty string.
+	 *
+	 * @param value The value to test.
+	 */
+	public void isEmpty(string value) {
+		if (value != "") {
+			throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * Asserts that a string value is an empty string.
+	 *
+	 * @param value The value to test.
+	 * @param message The message for the assertion error if the value is not an empty string.
+	 */
+	public void isEmpty(string value, string message) {
+		if (value != "") {
+			throw new Error(message); //throw new System.Errors.AssertError(message);
+		}
+	}
+	/**
+	 * Asserts that an external array is empty, an external object has no
+	 * non-inherited properties, or an external string is empty.
+	 *
+	 * @param value The value to test.
+	 */
+	public void isEmpty(external value) {
+		isEmpty(value, "Assertion error");
+	}
+	/**
+	 * Asserts that an external array is empty, an external object has no
+	 * non-inherited properties, or an external string is empty.
+	 *
+	 * @param value The value to test.
+	 * @param message The message for the assertion error if the value is not empty.
+	 */
+	public void isEmpty(external value, string message) {
+		if (Externals.JS.Object.prototype.toString.call(value) == "[object Array]") {
+			if (value.length !== 0) {
+				throw new Error(message); //throw new System.Errors.AssertError(message);
+			}
+
+			return;
+		}
+		if (Externals.JS.Object.prototype.toString.call(value) == "[object Object]") {
+			bool isEmpty = true;
+			var hasOwn = Externals.JS.Object.hasOwnProperty;
+			for (string prop in value) {
+				if (hasOwn.call(value, prop)) {
+					isEmpty = false;
+					break;
+				}
+			}
+
+			if (!isEmpty) {
+				throw new Error(message); //throw new System.Errors.AssertError(message);
+			}
+			
+			return;
+		}
+		if (typeof value == "string") {
+			if (value !== "") {
+				throw new Error(message); //throw new System.Errors.AssertError(message);
+			}
+			
+			return;
+		}
+
+		throw new Error(message); //throw new System.Errors.AssertError(message);
+	}
+	/**
+	 * Asserts that a string value is not an empty string.
+	 *
+	 * @param value The value to test.
+	 */
+	public void isNotEmpty(string value) {
+		if (value == "") {
+			throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+		}
+	}
+	/**
+	 * Asserts that a string value is not an empty string.
+	 *
+	 * @param value The value to test.
+	 * @param message The message for the assertion error if the value is an empty string.
+	 */
+	public void isNotEmpty(string value, string message) {
+		if (value == "") {
+			throw new Error(message); //throw new System.Errors.AssertError(message);
+		}
+	}
+	/**
+	 * Asserts that an external array is not empty, an external object has at
+	 * least one non-inherited property, or an external string is not empty.
+	 *
+	 * @param value The value to test.
+	 */
+	public void isNotEmpty(external value) {
+		isNotEmpty(value, "Assertion error");
+	}
+	/**
+	 * Asserts that an external array is not empty, an external object has at
+	 * least one non-inherited property, or an external string is not empty.
+	 *
+	 * @param value The value to test.
+	 * @param message The message for the assertion error if the value is empty.
+	 */
+	public void isNotEmpty(external value, string message) {
+		if (Externals.JS.Object.prototype.toString.call(value) == "[object Array]") {
+			if (value.length === 0) {
+				throw new Error(message); //throw new System.Errors.AssertError(message);
+			}
+
+			return;
+		}
+		if (Externals.JS.Object.prototype.toString.call(value) == "[object Object]") {
+			bool isEmpty = true;
+			var hasOwn = Externals.JS.Object.hasOwnProperty;
+			for (string prop in value) {
+				if (hasOwn.call(value, prop)) {
+					isEmpty = false;
+					break;
+				}
+			}
+
+			if (isEmpty) {
+				throw new Error(message); //throw new System.Errors.AssertError(message);
+			}
+
+			return;
+		}
+		if (typeof value == "string") {
+			if (value === "") {
+				throw new Error(message); //throw new System.Errors.AssertError(message);
+			}
+
+			return;
+		}
+
+		throw new Error(message); //throw new System.Errors.AssertError(message);
+	}
+
+	/**
+	 * Asserts that a block of code throws an exception.
+	 *
+	 * @param code The code to execute.
+	 */
+	public void throws(void() code) {
+		throws(code, "Assertion error");
+	}
+	/**
+	 * Asserts that a block of code throws an exception.
+	 *
+	 * @param code The code to execute.
+	 * @param message The message for the assertion error if the code does not throw an exception.
+	 */
+	public void throws(void() code, string message) {
+		bool caught = false;
+		try {
+			code();
+		}
+		catch(e) {
+			caught = true;
+			return;
+		}
+
+		if (!caught) {
+			throw new Error(message); //throw new System.Errors.AssertError(message);
+		}
+	}
+	/**
+	 * Asserts that a block of code throws the specified exception.
+	 *
+	 * @param code The code to execute.
+	 * @param exception The type of exception to expect.
+	 */
+	public void throws(void() code, external exception) {
+		throws(code, exception, "Assertion error");
+	}
+	/**
+	 * Asserts that a block of code throws the specified exception.
+	 *
+	 * @param code The code to execute.
+	 * @param exception The type of exception to expect.
+	 * @param message The message for the assertion error if the code does not throw the expected exception.
+	 */
+	public void throws(void() code, external exception, string message) {
+		bool caught = false;
+		try {
+			code();
+		}
+		catch(e) {
+			caught = true;
+			if (!(e instanceof exception)) {
+				throw e;
+			}
+			return;
+		}
+
+		if (!caught) {
+			throw new Error(message); //throw new System.Errors.AssertError(message);
+		}
+	}
+
+	/**
+	 * Asserts that a block of code does not throw an exception.
+	 *
+	 * @param code The code to execute.
+	 */
+	public void doesNotThrow(void() code) {
+		doesNotThrow(code, "Assertion error");
+	}
+	/**
+	 * Asserts that a block of code does not throw an exception.
+	 *
+	 * @param code The code to execute.
+	 * @param message The message for the assertion error if the code throws an exception.
+	 */
+	public void doesNotThrow(void() code, string message) {
+		try {
+			code();
+		}
+		catch(e) {
+			throw new Error(message);
+		}
+	}
+	/**
+	 * Asserts that a block of code does not throw a specific exception.
+	 *
+	 * @param code The code to execute.
+	 * @param exception The type of exception to expect.
+	 */
+	public void doesNotThrow(void() code, external exception) {
+		doesNotThrow(code, exception, "Assertion error");
+	}
+	/**
+	 * Asserts that a block of code does not throw a specific exception.
+	 *
+	 * @param code The code to execute.
+	 * @param exception The type of exception to expect.
+	 * @param message The message for the assertion error if the specific exception was thrown.
+	 */
+	public void doesNotThrow(void() code, external exception, string message) {
+		try {
+			code();
+		}
+		catch(e) {
+			if (e instanceof exception) {
+				throw new Error(message); //throw new System.Errors.AssertError(message);
+			}
+		}
+	}
+
+	/**
+	 * Fails a test.
+	 */
+	public void fail() {
+		throw new Error("Assertion error"); //throw new System.Errors.AssertError();
+	}
+	/**
+	 * Fails a test using a thrown exception with the specified message.
+	 *
+	 * @param message The message for the thrown exception.
+	 */
+	public void fail(string message) {
+		throw new Error(message); //throw new System.Errors.AssertError(message);
+	}
+}

@@ -1,0 +1,8 @@
+import Vendor.JSPPUnit;
+import Vendor.JSPPUnit.Test;
+import Vendor.JSPPUnit.Assert.Test;
+
+JSPPUnit.Test.queue();
+JSPPUnit.Assert.Test.queue();
+
+JSPPUnit.run();

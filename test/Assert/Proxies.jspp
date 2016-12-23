@@ -1,0 +1,21 @@
+import Vendor.JSPPUnit.Assert;
+
+/**
+ * Provides proxy functions for overloaded functions. We pass the proxy by
+ * reference since overloaded functions cannot be passed by reference.
+ */
+module Vendor.JSPPUnit.Assert.Test.Proxies
+{
+	/**
+	 * Proxy function for 'Vendor.JSPPUnit.Assert.ok'
+	 */
+	public void _ok(bool exp) {
+		ok(exp);
+	}
+	/**
+	 * Proxy function for 'Vendor.JSPPUnit.Assert.isTrue'
+	 */
+	public void _isTrue(bool exp) {
+		isTrue(exp);
+	}
+}
