@@ -2,7 +2,7 @@ clean:
 	rm app.jspp.js
 
 test:
-	js++ ./src ./test ../ConsoleStyle/ && node app.jspp.js
+	js++ ./src ./test ../ConsoleStyle/src/ && node app.jspp.js
 	$(MAKE) clean
 
 .PHONY: test
