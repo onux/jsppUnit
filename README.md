@@ -1,3 +1,5 @@
+![js++Unit](logo.png)
+
 # js++Unit
 
 js++Unit is an xUnit unit testing framework for writing and running automated tests using the JS++ programming language.
