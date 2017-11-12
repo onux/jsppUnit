@@ -20,15 +20,6 @@ module Vendor.JSPPUnit
 			--State.counter_indent;
 		}
 		/**
-		 * @param code The callback defined for the test suite.
-		 */
-		public static void runSuite(external code) {
-			++State.counter_indent;
-			code();
-			Console.log("");
-			--State.counter_indent;
-		}
-		/**
 		 * @overload runTest
 		 *
 		 * Executes a test.
