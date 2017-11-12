@@ -2,7 +2,7 @@ import System;
 
 module Vendor.JSPPUnit
 {
-	private class State
+	protected class State
 	{
 		public static int counter_runTests = 0;
 		public static int counter_passedTests = 0;

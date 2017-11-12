@@ -9,28 +9,6 @@ external process;
  */
 module Vendor.JSPPUnit
 {
-	// TODO: RFCT: refactor to a private 'Utils' module once we have classes to access PADDING globally
-	/**
-	 * Gets the indentation for pretty printing test output to the console.
-	 *
-	 * @return The currently-appropriate indentation as a string.
-	 */
-	private string getPadding() {
-		string padding = Utils.PADDING;
-		for (int i = 0; i < State.counter_indent; ++i) {
-			padding += Utils.PADDING;
-		}
-
-		return padding;
-	}
-	/**
-	 * Prints the title for the current test suite.
-	 */
-	private void printSuiteTitle(string title) {
-		Console.log(getPadding() + title);
-		Console.log("");
-	}
-
 	// TODO: RFCT: refactor to a 'Run' module?
 	// TODO: RFCT: refactor runSuite() common logic... only type is different. compiler bug?
 	/**
@@ -92,14 +70,14 @@ module Vendor.JSPPUnit
 		}
 		finally {
 			if (exceptionPasses ? caught : !caught) {
-				Console.log(getPadding() + ConsoleStyle.Colors.green(Utils.PADDING + PASS) + " " + ConsoleStyle.Colors.gray(title));
+				Console.log(Utils.getPadding() + ConsoleStyle.Colors.green(Utils.PADDING + PASS) + " " + ConsoleStyle.Colors.gray(title));
 				++State.counter_passedTests;
 			}
 			else {
-				Console.log(getPadding() + ConsoleStyle.Colors.red(Utils.PADDING + FAIL + " " +  title));
+				Console.log(Utils.getPadding() + ConsoleStyle.Colors.red(Utils.PADDING + FAIL + " " +  title));
 
 				if (!exceptionPasses) {
-					Console.log(getPadding() + Utils.PADDING + ConsoleStyle.Colors.red(exceptionObject));
+					Console.log(Utils.getPadding() + Utils.PADDING + ConsoleStyle.Colors.red(exceptionObject));
 					++State.counter_failedTests;
 				}
 			}
@@ -116,7 +94,7 @@ module Vendor.JSPPUnit
 	 */
 	public void suite(string title, void() code) {
 		if (State.running) {
-			printSuiteTitle(title);
+			Utils.printSuiteTitle(title);
 			runSuite(code);
 		}
 		else {
@@ -142,7 +120,7 @@ module Vendor.JSPPUnit
 	 */
 	public void skip(string title, void() code) {
 		string SKIP = "\u25CB";
-		Console.log(getPadding() + ConsoleStyle.Colors.cyan(Utils.PADDING + SKIP + " " + title));
+		Console.log(Utils.getPadding() + ConsoleStyle.Colors.cyan(Utils.PADDING + SKIP + " " + title));
 		++State.counter_skippedTests;
 	}
 
@@ -179,7 +157,7 @@ module Vendor.JSPPUnit
 		double t = d.getTime();
 
 		for(string suiteTitle in State.suitesQueue) {
-			printSuiteTitle(suiteTitle);
+			Utils.printSuiteTitle(suiteTitle);
 
 			void() suiteCode = State.suitesQueue[suiteTitle];
 			runSuite(suiteCode);

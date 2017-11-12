@@ -1,7 +1,30 @@
+import System;
+
 module Vendor.JSPPUnit
 {
 	private class Utils
 	{
 		public static /*final*/ string PADDING = "  ";
+
+		/**
+		 * Gets the indentation for pretty printing test output to the console.
+		 *
+		 * @return The currently-appropriate indentation as a string.
+		 */
+		public static string getPadding() {
+			string padding = Utils.PADDING;
+			for (int i = 0; i < State.counter_indent; ++i) {
+				padding += Utils.PADDING;
+			}
+
+			return padding;
+		}
+		/**
+		 * Prints the title for the current test suite.
+		 */
+		public static void printSuiteTitle(string title) {
+			Console.log(getPadding() + title);
+			Console.log("");
+		}
 	}
 }
