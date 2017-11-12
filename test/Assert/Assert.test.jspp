@@ -17,7 +17,7 @@ module Vendor.JSPPUnit.Assert.Test
 
 		suite("Vendor.JSPPUnit.Assert", void() {
 			test("ok", void() {
-				Utils.isTrueTest(_ok);
+				Assert.Test.Utils.isTrueTest(_ok);
 
 				ok(0 === 0);
 				ok(1 === 1, "Basic equality");
@@ -581,7 +581,7 @@ module Vendor.JSPPUnit.Assert.Test
 				notDeepUnstrictEqual(foo, bar);
 			});
 			test("isTrue", void() {
-				Utils.isTrueTest(_isTrue);
+				Assert.Test.Utils.isTrueTest(_isTrue);
 
 				isTrue(0 === 0);
 				isTrue(1 === 1, "Basic equality");

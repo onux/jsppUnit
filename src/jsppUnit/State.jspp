@@ -1,0 +1,16 @@
+import System;
+
+module Vendor.JSPPUnit
+{
+	private class State
+	{
+		public static int counter_runTests = 0;
+		public static int counter_passedTests = 0;
+		public static int counter_failedTests = 0;
+		public static int counter_skippedTests = 0;
+		public static int counter_indent = 0;
+
+		public static Dictionary<void()> suitesQueue = new Dictionary<void()>;
+		public static bool running = false;
+	}
+}

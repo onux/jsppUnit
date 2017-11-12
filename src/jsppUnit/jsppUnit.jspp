@@ -1,14 +1,7 @@
+import System;
 import Vendor.Onux.ConsoleStyle;
 
-external console;
-external process, Date;
-
-// States
-// These are HACKS until we have classes/module fields
-external /*int*/ counter_runTests = 0, counter_passedTests = 0, counter_failedTests = 0, counter_skippedTests = 0, counter_indent = 0;
-external /*System.Dictionary<string, void()>*/ suitesQueue = [];
-external /*string*/ PADDING = "  ";
-external global = (function() { return this; }).call(); // ugly hack to get a mutable "running" bool (global.running)
+external process;
 
 /**
  * js++Unit is an xUnit testing framework for writing and running automated 
@@ -23,9 +16,9 @@ module Vendor.JSPPUnit
 	 * @return The currently-appropriate indentation as a string.
 	 */
 	private string getPadding() {
-		string padding = PADDING;
-		for (int i = 0; i < counter_indent; ++i) {
-			padding += PADDING;
+		string padding = Utils.PADDING;
+		for (int i = 0; i < State.counter_indent; ++i) {
+			padding += Utils.PADDING;
 		}
 
 		return padding;
@@ -34,8 +27,8 @@ module Vendor.JSPPUnit
 	 * Prints the title for the current test suite.
 	 */
 	private void printSuiteTitle(string title) {
-		console.log(getPadding() + title);
-		console.log("");
+		Console.log(getPadding() + title);
+		Console.log("");
 	}
 
 	// TODO: RFCT: refactor to a 'Run' module?
@@ -49,19 +42,19 @@ module Vendor.JSPPUnit
 	 * @param code The callback defined for the test suite.
 	 */
 	private void runSuite(void() code) {
-		++counter_indent;
+		++State.counter_indent;
 		code();
-		console.log("");
-		--counter_indent;
+		Console.log("");
+		--State.counter_indent;
 	}
 	/**
 	 * @param code The callback defined for the test suite.
 	 */
 	private void runSuite(external code) {
-		++counter_indent;
+		++State.counter_indent;
 		code();
-		console.log("");
-		--counter_indent;
+		Console.log("");
+		--State.counter_indent;
 	}
 	/**
 	 * @overload runTest
@@ -99,20 +92,20 @@ module Vendor.JSPPUnit
 		}
 		finally {
 			if (exceptionPasses ? caught : !caught) {
-				console.log(getPadding() + ConsoleStyle.Colors.green(PADDING + PASS) + " " + ConsoleStyle.Colors.gray(title));
-				++counter_passedTests;
+				Console.log(getPadding() + ConsoleStyle.Colors.green(Utils.PADDING + PASS) + " " + ConsoleStyle.Colors.gray(title));
+				++State.counter_passedTests;
 			}
 			else {
-				console.log(getPadding() + ConsoleStyle.Colors.red(PADDING + FAIL + " " +  title));
+				Console.log(getPadding() + ConsoleStyle.Colors.red(Utils.PADDING + FAIL + " " +  title));
 
 				if (!exceptionPasses) {
-					console.log(getPadding() + PADDING + ConsoleStyle.Colors.red(exceptionObject));
-					++counter_failedTests;
+					Console.log(getPadding() + Utils.PADDING + ConsoleStyle.Colors.red(exceptionObject));
+					++State.counter_failedTests;
 				}
 			}
 		}
 
-		++counter_runTests;
+		++State.counter_runTests;
 	}
 
 	/**
@@ -122,15 +115,12 @@ module Vendor.JSPPUnit
 	 * @param code The code for the test suite.
 	 */
 	public void suite(string title, void() code) {
-		if (global.running) {
+		if (State.running) {
 			printSuiteTitle(title);
 			runSuite(code);
 		}
 		else {
-			suitesQueue.push({
-				title: title,
-				code: code
-			});
+			State.suitesQueue[title] = code;
 		}
 	}
 
@@ -152,8 +142,8 @@ module Vendor.JSPPUnit
 	 */
 	public void skip(string title, void() code) {
 		string SKIP = "\u25CB";
-		console.log(getPadding() + ConsoleStyle.Colors.cyan(PADDING + SKIP + " " + title));
-		++counter_skippedTests;
+		Console.log(getPadding() + ConsoleStyle.Colors.cyan(Utils.PADDING + SKIP + " " + title));
+		++State.counter_skippedTests;
 	}
 
 	/**
@@ -181,24 +171,47 @@ module Vendor.JSPPUnit
 	 * Runs the defined tests.
 	 */
 	public void run() {
-		global.running = true;
-		console.log("");
+		State.running = true;
+		Console.log("");
 
-		var t = new Date;
+		// TODO: replace with 'System.Benchmark'
+		Date d = new Date();
+		double t = d.getTime();
 
-		// TODO: refactor to 'foreach' once it becomes available
-		for (int i = 0, len = suitesQueue.length; i < len; ++i) {
-			printSuiteTitle(suitesQueue[i].title);
-			runSuite(suitesQueue[i].code);
+		for(string suiteTitle in State.suitesQueue) {
+			printSuiteTitle(suiteTitle);
+
+			void() suiteCode = State.suitesQueue[suiteTitle];
+			runSuite(suiteCode);
 		}
 
-		console.log("");
-		if (counter_passedTests > 0)  console.log(PADDING + ConsoleStyle.Colors.green(counter_passedTests + " passing") + ConsoleStyle.Colors.gray(" (" +(new Date - t) + "ms)"));
-		if (counter_skippedTests > 0) console.log(PADDING + ConsoleStyle.Colors.cyan(counter_skippedTests + " skipped"));
-		if (counter_failedTests > 0)  console.log(PADDING + ConsoleStyle.Colors.red(counter_failedTests + " failed"));
-		console.log("");
+		string output = "";
+		Console.log(String.EMPTY);
+		if (State.counter_passedTests > 0)  {
+			double time = (new Date).getTime() - t;
 
-		if (counter_failedTests > 0 && typeof process == "object") {
+			output += Utils.PADDING;
+			output += ConsoleStyle.Colors.green(
+				State.counter_passedTests.toString() + " passing"
+			);
+			output += ConsoleStyle.Colors.gray(" (" + time.toString() + "ms)");
+		}
+		if (State.counter_skippedTests > 0) {
+			output += Utils.PADDING;
+			output += ConsoleStyle.Colors.cyan(
+				State.counter_skippedTests.toString() + " skipped"
+			);
+		}
+		if (State.counter_failedTests > 0) {
+			output += Utils.PADDING;
+			output += ConsoleStyle.Colors.red(
+				State.counter_failedTests.toString() + " failed"
+			);
+		}
+		Console.log(output);
+		Console.log(String.EMPTY);
+
+		if (State.counter_failedTests > 0 && typeof process == "object") {
 			process.exit(1);
 		}
 	}

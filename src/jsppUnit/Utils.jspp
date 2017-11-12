@@ -1,0 +1,7 @@
+module Vendor.JSPPUnit
+{
+	private class Utils
+	{
+		public static /*final*/ string PADDING = "  ";
+	}
+}
