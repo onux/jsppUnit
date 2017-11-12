@@ -1,0 +1,83 @@
+import System;
+import Vendor.Onux.ConsoleStyle;
+
+module Vendor.JSPPUnit
+{
+	private class Runner
+	{
+		/**
+		 * @overload runSuite
+		 *
+		 * Executes a test suite.
+		 */
+		/**
+		 * @param code The callback defined for the test suite.
+		 */
+		public static void runSuite(void() code) {
+			++State.counter_indent;
+			code();
+			Console.log("");
+			--State.counter_indent;
+		}
+		/**
+		 * @param code The callback defined for the test suite.
+		 */
+		public static void runSuite(external code) {
+			++State.counter_indent;
+			code();
+			Console.log("");
+			--State.counter_indent;
+		}
+		/**
+		 * @overload runTest
+		 *
+		 * Executes a test.
+		 */
+		/**
+		 * @param title The title defined for the test.
+		 * @param code The callback defined for the test.
+		 * @param exceptionPasses Does a thrown exception qualify as a passed test?
+		 */
+		public static void runTest(string title, void() code, bool exceptionPasses) {
+			runTest(title, code, exceptionPasses, null);
+		}
+		/**
+		 * @param title The title defined for the test.
+		 * @param code The callback defined for the test.
+		 * @param exceptionPasses Does a thrown exception qualify as a passed test?
+		 * @param exception The exception to expect if a thrown exception qualifies as a passed test.
+		 */
+		public static void runTest(string title, void() code, bool exceptionPasses, external exception) {
+			bool caught = false;
+			var exceptionObject;
+			string PASS = "\u2714", FAIL = "\u2716";
+
+			try {
+				code();
+			}
+			catch(external e) {
+				bool requiresException = exception != null;
+				bool exceptionMatches = e === exception;
+
+				caught = requiresException ? exceptionMatches : true;
+				exceptionObject = e;
+			}
+			finally {
+				if (exceptionPasses ? caught : !caught) {
+					Console.log(Utils.getPadding() + ConsoleStyle.Colors.green(Utils.PADDING + PASS) + " " + ConsoleStyle.Colors.gray(title));
+					++State.counter_passedTests;
+				}
+				else {
+					Console.log(Utils.getPadding() + ConsoleStyle.Colors.red(Utils.PADDING + FAIL + " " +  title));
+
+					if (!exceptionPasses) {
+						Console.log(Utils.getPadding() + Utils.PADDING + ConsoleStyle.Colors.red(exceptionObject));
+						++State.counter_failedTests;
+					}
+				}
+			}
+
+			++State.counter_runTests;
+		}
+	}
+}

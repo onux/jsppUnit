@@ -9,83 +9,6 @@ external process;
  */
 module Vendor.JSPPUnit
 {
-	// TODO: RFCT: refactor to a 'Run' module?
-	// TODO: RFCT: refactor runSuite() common logic... only type is different. compiler bug?
-	/**
-	 * @overload runSuite
-	 *
-	 * Executes a test suite.
-	 */
-	/**
-	 * @param code The callback defined for the test suite.
-	 */
-	private void runSuite(void() code) {
-		++State.counter_indent;
-		code();
-		Console.log("");
-		--State.counter_indent;
-	}
-	/**
-	 * @param code The callback defined for the test suite.
-	 */
-	private void runSuite(external code) {
-		++State.counter_indent;
-		code();
-		Console.log("");
-		--State.counter_indent;
-	}
-	/**
-	 * @overload runTest
-	 *
-	 * Executes a test.
-	 */
-	/**
-	 * @param title The title defined for the test.
-	 * @param code The callback defined for the test.
-	 * @param exceptionPasses Does a thrown exception qualify as a passed test?
-	 */
-	private void runTest(string title, void() code, bool exceptionPasses) {
-		runTest(title, code, exceptionPasses, null);
-	}
-	/**
-	 * @param title The title defined for the test.
-	 * @param code The callback defined for the test.
-	 * @param exceptionPasses Does a thrown exception qualify as a passed test?
-	 * @param exception The exception to expect if a thrown exception qualifies as a passed test.
-	 */
-	private void runTest(string title, void() code, bool exceptionPasses, external exception) {
-		bool caught = false;
-		var exceptionObject;
-		string PASS = "\u2714", FAIL = "\u2716";
-
-		try {
-			code();
-		}
-		catch(external e) {
-			bool requiresException = exception != null;
-			bool exceptionMatches = e === exception;
-
-			caught = requiresException ? exceptionMatches : true;
-			exceptionObject = e;
-		}
-		finally {
-			if (exceptionPasses ? caught : !caught) {
-				Console.log(Utils.getPadding() + ConsoleStyle.Colors.green(Utils.PADDING + PASS) + " " + ConsoleStyle.Colors.gray(title));
-				++State.counter_passedTests;
-			}
-			else {
-				Console.log(Utils.getPadding() + ConsoleStyle.Colors.red(Utils.PADDING + FAIL + " " +  title));
-
-				if (!exceptionPasses) {
-					Console.log(Utils.getPadding() + Utils.PADDING + ConsoleStyle.Colors.red(exceptionObject));
-					++State.counter_failedTests;
-				}
-			}
-		}
-
-		++State.counter_runTests;
-	}
-
 	/**
 	 * Defines a test suite.
 	 *
@@ -95,7 +18,7 @@ module Vendor.JSPPUnit
 	public void suite(string title, void() code) {
 		if (State.running) {
 			Utils.printSuiteTitle(title);
-			runSuite(code);
+			Runner.runSuite(code);
 		}
 		else {
 			State.suitesQueue[title] = code;
@@ -109,7 +32,7 @@ module Vendor.JSPPUnit
 	 * @param code The code for the test.
 	 */
 	public void test(string title, void() code) {
-		runTest(title, code, false);
+		Runner.runTest(title, code, false);
 	}
 
 	/**
@@ -131,7 +54,7 @@ module Vendor.JSPPUnit
 	 * @param code The code for the test.
 	 */
 	public void throws(string title, void() code) {
-		runTest(title, code, true);
+		Runner.runTest(title, code, true);
 	}
 	/**
 	 * Defines a test that expects a specific exception to be thrown.
@@ -141,9 +64,8 @@ module Vendor.JSPPUnit
 	 * @param exception The type of exception to expect.
 	 */
 	public void throws(string title, void() code, external exception) {
-		runTest(title, code, true, exception);
+		Runner.runTest(title, code, true, exception);
 	}
-
 
 	/**
 	 * Runs the defined tests.
@@ -160,7 +82,7 @@ module Vendor.JSPPUnit
 			Utils.printSuiteTitle(suiteTitle);
 
 			void() suiteCode = State.suitesQueue[suiteTitle];
-			runSuite(suiteCode);
+			Runner.runSuite(suiteCode);
 		}
 
 		string output = "";

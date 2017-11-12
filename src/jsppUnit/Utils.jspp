@@ -2,7 +2,7 @@ import System;
 
 module Vendor.JSPPUnit
 {
-	private class Utils
+	protected class Utils
 	{
 		public static /*final*/ string PADDING = "  ";
 
