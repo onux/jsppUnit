@@ -61,6 +61,19 @@ You can then execute all of your modularized tests by importing them into the ma
 
 	JSPPUnit.run();
 
+## Web Browser Output
+
+`js++Unit` supports web browser output if executed inside a web browser. Simply include the compiled `.jspp.js` file for your tests:
+
+	<!DOCTYPE html>
+	<head>
+	<title>js++Unit Web Browser</title>
+	</head>
+	<body>
+	<script type="text/javascript" src="../path/to/tests_main_file.jspp.js"></script>
+	</body>
+	</html>
+
 ## License
 
 MIT License
