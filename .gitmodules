@@ -1,0 +1,3 @@
+[submodule "libs/ConsoleStyle"]
+	path = libs/ConsoleStyle
+	url = git@gitlab.com:jspp-oss/ConsoleStyle.git
