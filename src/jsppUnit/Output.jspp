@@ -1,0 +1,125 @@
+import System;
+import Externals.DOM;
+
+module Vendor.JSPPUnit
+{
+    protected class Output
+    {
+        private enum Colors {
+            BLACK  = 30,
+            RED    = 31,
+            GREEN  = 32,
+            YELLOW = 33,
+            BLUE   = 34,
+            PURPLE = 35,
+            CYAN   = 36,
+            WHITE  = 37,
+            GRAY   = 90
+        }
+
+        /**
+         * Writes the output message to the terminal or web browser.
+         */
+        public static void write(string message) {
+            bool isBrowser = typeof window == "object" &&
+                             typeof document == "object";
+            if (isBrowser) {
+                writeBrowser(message);
+            }
+            else {
+                writeConsole(message);
+            }
+        }
+
+        /**
+         * Writes output to the terminal.
+         */
+        private static void writeConsole(string message) {
+            Console.log(message);
+        }
+
+        /**
+         * Writes output to the web browser via the DOM API.
+         */
+        private static void writeBrowser(string message) {
+            message = message.replace(/\x20/g, "&nbsp;");
+            var line = document.createElement("div");
+            line.style.fontFamily = "Tahoma, Geneva, sans-serif";
+            line.style.fontSize = "0.8em";
+            line.innerHTML = ansiEscapeToHtml(message);
+
+            document.body.appendChild(line);
+        }
+
+        /**
+         * Converts ANSI escape codes to HTML.
+         */
+        private static string ansiEscapeToHtml(string message) {
+            if (message == String.EMPTY) {
+                return "&nbsp;";
+            }
+
+            return message.replace(
+                /\x1B\[(\d\d)m((?:(?!\x1B\[0m).)*)\x1B\[0m/g,
+                string(string matched, ...string captureGroups) {
+                    string result = "";
+
+                    // TODO: RFCT: use enum.valueOf() instead of cast
+                    Colors colorCode = (Colors) +captureGroups.first();
+                    string innerText = captureGroups[1];
+
+                    switch(colorCode) {
+                        case Colors.RED:
+                            result = '<span style="color:#ff0000;">' +
+                                     innerText +
+                                     '</span>';
+                            break;
+                        case Colors.YELLOW:
+                            result = '<span style="color:#eeee00;">' +
+                                     innerText +
+                                     '</span>';
+                            break;
+                        case Colors.BLUE:
+                            result = '<span style="color:#00ff00;">' +
+                                     innerText +
+                                     '</span>';
+                            break;
+                        case Colors.PURPLE:
+                            result = '<span style="color:#7d26cd;">' +
+                                     innerText +
+                                     '</span>';
+                            break;
+                        case Colors.GREEN:
+                            result = '<span style="color:#008b00;">' +
+                                     innerText +
+                                     '</span>';
+                            break;
+                        case Colors.CYAN:
+                            result = '<span style="color:#008b8b;">' +
+                                     innerText +
+                                     '</span>';
+                            break;
+                        case Colors.WHITE:
+                            result = '<span style="color:#fafafa;">' +
+                                     innerText +
+                                     '</span>';
+                            break;
+                        case Colors.GRAY:
+                            result = '<span style="color:#808080;">' +
+                                     innerText +
+                                     '</span>';
+                            break;
+                        case Colors.BLACK:
+                        default:
+                            result = '<span style="color:#303030;">' +
+                                     innerText +
+                                     '</span>';
+                            break;
+                    }
+
+                    return result;
+                }
+            );
+        }
+    }
+}

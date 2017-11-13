@@ -16,7 +16,7 @@ module Vendor.JSPPUnit
 		public static void runSuite(void() code) {
 			++State.counter_indent;
 			code();
-			Console.log("");
+			Output.write("");
 			--State.counter_indent;
 		}
 		/**
@@ -55,14 +55,14 @@ module Vendor.JSPPUnit
 			}
 			finally {
 				if (exceptionPasses ? caught : !caught) {
-					Console.log(Utils.getPadding() + ConsoleStyle.Colors.green(Utils.PADDING + PASS) + " " + ConsoleStyle.Colors.gray(title));
+					Output.write(Utils.getPadding() + ConsoleStyle.Colors.green(Utils.PADDING + PASS) + " " + ConsoleStyle.Colors.gray(title));
 					++State.counter_passedTests;
 				}
 				else {
-					Console.log(Utils.getPadding() + ConsoleStyle.Colors.red(Utils.PADDING + FAIL + " " +  title));
+					Output.write(Utils.getPadding() + ConsoleStyle.Colors.red(Utils.PADDING + FAIL + " " +  title));
 
 					if (!exceptionPasses) {
-						Console.log(Utils.getPadding() + Utils.PADDING + ConsoleStyle.Colors.red(exceptionObject));
+						Output.write(Utils.getPadding() + Utils.PADDING + ConsoleStyle.Colors.red(exceptionObject));
 						++State.counter_failedTests;
 					}
 				}

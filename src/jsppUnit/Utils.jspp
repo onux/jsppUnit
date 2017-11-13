@@ -23,8 +23,8 @@ module Vendor.JSPPUnit
 		 * Prints the title for the current test suite.
 		 */
 		public static void printSuiteTitle(string title) {
-			Console.log(getPadding() + title);
-			Console.log("");
+			Output.write(getPadding() + title);
+			Output.write("");
 		}
 	}
 }

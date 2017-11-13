@@ -43,7 +43,10 @@ module Vendor.JSPPUnit
 	 */
 	public void skip(string title, void() code) {
 		string SKIP = "\u25CB";
-		Console.log(Utils.getPadding() + ConsoleStyle.Colors.cyan(Utils.PADDING + SKIP + " " + title));
+		Output.write(
+			Utils.getPadding() +
+			ConsoleStyle.Colors.cyan(Utils.PADDING + SKIP + " " + title)
+		);
 		++State.counter_skippedTests;
 	}
 
@@ -72,7 +75,7 @@ module Vendor.JSPPUnit
 	 */
 	public void run() {
 		State.running = true;
-		Console.log("");
+		Output.write("");
 
 		// TODO: replace with 'System.Benchmark'
 		Date d = new Date();
@@ -86,7 +89,7 @@ module Vendor.JSPPUnit
 		}
 
 		string output = "";
-		Console.log(String.EMPTY);
+		Output.write(String.EMPTY);
 		if (State.counter_passedTests > 0)  {
 			double time = (new Date).getTime() - t;
 
@@ -108,8 +111,8 @@ module Vendor.JSPPUnit
 				State.counter_failedTests.toString() + " failed"
 			);
 		}
-		Console.log(output);
-		Console.log(String.EMPTY);
+		Output.write(output);
+		Output.write(String.EMPTY);
 
 		if (State.counter_failedTests > 0 && typeof process == "object") {
 			process.exit(1);
