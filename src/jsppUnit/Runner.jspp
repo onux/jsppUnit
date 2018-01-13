@@ -40,18 +40,25 @@ module Vendor.JSPPUnit
 		 */
 		public static void runTest(string title, void() code, bool exceptionPasses, external exception) {
 			bool caught = false;
-			var exceptionObject;
+			System.Object exceptionObject;
 			string PASS = "\u2714", FAIL = "\u2716";
 
 			try {
 				code();
+			}
+			catch(System.Exception e) {
+				bool requiresException = exception != null;
+				bool exceptionMatches = false;
+
+				caught = requiresException ? exceptionMatches : true;
+				exceptionObject = e;
 			}
 			catch(external e) {
 				bool requiresException = exception != null;
 				bool exceptionMatches = e === exception;
 
 				caught = requiresException ? exceptionMatches : true;
-				exceptionObject = e;
+				exceptionObject = new System.BoxedExternal(e);
 			}
 			finally {
 				if (exceptionPasses ? caught : !caught) {
@@ -62,7 +69,7 @@ module Vendor.JSPPUnit
 					Output.write(Utils.getPadding() + ConsoleStyle.Colors.red(Utils.PADDING + FAIL + " " +  title));
 
 					if (!exceptionPasses) {
-						Output.write(Utils.getPadding() + Utils.PADDING + ConsoleStyle.Colors.red(exceptionObject));
+						Output.write(Utils.getPadding() + Utils.PADDING + ConsoleStyle.Colors.red(exceptionObject.toString()));
 						++State.counter_failedTests;
 					}
 				}
