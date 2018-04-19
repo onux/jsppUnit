@@ -69,7 +69,15 @@ module Vendor.JSPPUnit
 					Output.write(Utils.getPadding() + ConsoleStyle.Colors.red(Utils.PADDING + FAIL + " " +  title));
 
 					if (!exceptionPasses) {
-						Output.write(Utils.getPadding() + Utils.PADDING + ConsoleStyle.Colors.red(exceptionObject.toString()));
+						string message;
+						if (exceptionObject instanceof System.BoxedExternal) {
+							message = ((System.BoxedExternal) exceptionObject).unbox();
+						}
+						else {
+							message = exceptionObject.toString();
+						}
+
+						Output.write(Utils.getPadding() + Utils.PADDING + ConsoleStyle.Colors.red(message));
 						++State.counter_failedTests;
 					}
 				}
