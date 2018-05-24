@@ -46,7 +46,7 @@ module Vendor.JSPPUnit.Assert
 	 */
 	private bool deepCompare(external a, external b, bool(external, external) compareEquality) {
 		var visited = [];
-		bool equal = (bool descend(external a, external b) {
+		bool equal = (bool recurse(external a, external b) {
 			if (compareEquality(a, b)) {
 				return true;
 			}
@@ -76,7 +76,7 @@ module Vendor.JSPPUnit.Assert
 			if (bothArrays && a.length === b.length) {
 				int i = 0, len = a.length;
 				for (; i < len; ++i) {
-					if (a[i] !== b[i] && !descend(a[i], b[i])) {
+					if (a[i] !== b[i] && !recurse(a[i], b[i])) {
 						break;
 					}
 				}
@@ -123,7 +123,7 @@ module Vendor.JSPPUnit.Assert
 					keysMatch = keyA === keyB;
 					valuesMatch = compareEquality(valueA, valueB);
 					if (!keysMatch || !valuesMatch) {
-						valuesDeeplyMatch = descend(valueA, valueB);
+						valuesDeeplyMatch = recurse(valueA, valueB);
 
 						if (!valuesDeeplyMatch) {
 							break;
