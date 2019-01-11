@@ -84,7 +84,7 @@ module Vendor.JSPPUnit
 		for(string suiteTitle in State.suitesQueue) {
 			Utils.printSuiteTitle(suiteTitle);
 
-			void() suiteCode = State.suitesQueue[suiteTitle];
+			void() suiteCode = State.suitesQueue[suiteTitle] ?? void(){};
 			Runner.runSuite(suiteCode);
 		}
 

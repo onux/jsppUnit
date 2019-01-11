@@ -65,8 +65,8 @@ module Vendor.JSPPUnit
                     string result = "";
 
                     // TODO: RFCT: use enum.valueOf() instead of cast
-                    Colors colorCode = (Colors) +captureGroups.first();
-                    string innerText = captureGroups[1];
+                    Colors colorCode = (Colors) Integer32.fromString(captureGroups.first() ?? "0");
+                    string innerText = captureGroups[1] ?? "";
 
                     switch(colorCode) {
                         case Colors.RED:
