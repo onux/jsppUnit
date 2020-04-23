@@ -2,144 +2,144 @@ import Externals.JS;
 
 module Vendor.JSPPUnit.Assert
 {
-	/**
-	 * Gets the keys for an object (shallow).
-	 *
-	 * @param obj The object to retrieve the keys for.
-	 * @return An array of object keys.
-	 */
-	private function /*string[]*/ getObjectKeys(external obj) {
-		var /*string[]*/ props = [];
-		for (string prop in obj) {
-			props.push(prop);
-		}
+    /**
+     * Gets the keys for an object (shallow).
+     *
+     * @param obj The object to retrieve the keys for.
+     * @return An array of object keys.
+     */
+    private function /*string[]*/ getObjectKeys(external obj) {
+        var /*string[]*/ props = [];
+        for (string prop in obj) {
+            props.push(prop);
+        }
 
-		return props.sort();
-	}
-	/**
-	 * Perform a strict equality comparison.
-	 *
-	 * @param a The first value to compare.
-	 * @param b The second value to compare.
-	 * @return The result of the comparison operation.
-	 */
-	private /*inline*/ bool operator_equal(external a, external b) {
-		return a === b;
-	}
-	/**
-	 * Perform an unstrict equality comparison.
-	 *
-	 * @param a The first value to compare.
-	 * @param b The second value to compare.
-	 * @return The result of the comparison operation.
-	 */
-	private /*inline*/ bool operator_unstrictEqual(external a, external b) {
-		return a == b;
-	}
-	/**
-	 * Recursively compares two values using depth-first search.
-	 *
-	 * @param a The first value to compare.
-	 * @param b The second value to compare.
-	 * @param compareEquality The comparison function to use to compare the values.
-	 * @return The result of the comparison function applied recursively to both values.
-	 */
-	private bool deepCompare(external a, external b, bool(external, external) compareEquality) {
-		var visited = [];
-		bool equal = (bool recurse(external a, external b) {
-			if (compareEquality(a, b)) {
-				return true;
-			}
-			if (typeof a == "string" || typeof b == "string") {
-				return compareEquality(a, b);
-			}
-			if (typeof a == "number" || typeof b == "number") {
-				return compareEquality(a, b);
-			}
-			if (typeof a == "boolean" || typeof b == "boolean") {
-				return compareEquality(a, b);
-			}
-			if (typeof a == "function" || typeof b == "function") {
-				return compareEquality(a, b);
-			}
-			if (a == null || b == null) {
-				return compareEquality(a, b);
-			}
-			bool sameInternalClass = 	Externals.JS.Object.prototype.toString.call(a) ==
-										Externals.JS.Object.prototype.toString.call(b);
-			if (!sameInternalClass) {
-				return false;
-			}
+        return props.sort();
+    }
+    /**
+     * Perform a strict equality comparison.
+     *
+     * @param a The first value to compare.
+     * @param b The second value to compare.
+     * @return The result of the comparison operation.
+     */
+    private /*inline*/ bool operator_equal(external a, external b) {
+        return a === b;
+    }
+    /**
+     * Perform an unstrict equality comparison.
+     *
+     * @param a The first value to compare.
+     * @param b The second value to compare.
+     * @return The result of the comparison operation.
+     */
+    private /*inline*/ bool operator_unstrictEqual(external a, external b) {
+        return a == b;
+    }
+    /**
+     * Recursively compares two values using depth-first search.
+     *
+     * @param a The first value to compare.
+     * @param b The second value to compare.
+     * @param compareEquality The comparison function to use to compare the values.
+     * @return The result of the comparison function applied recursively to both values.
+     */
+    private bool deepCompare(external a, external b, bool(external, external) compareEquality) {
+        var visited = [];
+        bool equal = (bool recurse(external c, external d) {
+            if (compareEquality(c, d)) {
+                return true;
+            }
+            if (typeof c == "string" || typeof d == "string") {
+                return compareEquality(c, d);
+            }
+            if (typeof c == "number" || typeof d == "number") {
+                return compareEquality(c, d);
+            }
+            if (typeof c == "boolean" || typeof d == "boolean") {
+                return compareEquality(c, d);
+            }
+            if (typeof c == "function" || typeof d == "function") {
+                return compareEquality(c, d);
+            }
+            if (c == null || d == null) {
+                return compareEquality(c, d);
+            }
+            bool sameInternalClass =    Externals.JS.Object.prototype.toString.call(c) ==
+                                        Externals.JS.Object.prototype.toString.call(d);
+            if (!sameInternalClass) {
+                return false;
+            }
 
-			bool bothArrays = 	Externals.JS.Object.prototype.toString.call(a) == "[object Array]" &&
-								Externals.JS.Object.prototype.toString.call(b) == "[object Array]";
-			if (bothArrays && a.length === b.length) {
-				int i = 0, len = a.length;
-				for (; i < len; ++i) {
-					if (a[i] !== b[i] && !recurse(a[i], b[i])) {
-						break;
-					}
-				}
+            bool bothArrays =   Externals.JS.Object.prototype.toString.call(c) == "[object Array]" &&
+                                Externals.JS.Object.prototype.toString.call(d) == "[object Array]";
+            if (bothArrays && c.length === d.length) {
+                int i = 0, len = c.length;
+                for (; i < len; ++i) {
+                    if (c[i] !== d[i] && !recurse(c[i], d[i])) {
+                        break;
+                    }
+                }
 
-				if (i === b.length) {
-					return true;
-				}
-			}
+                if (i === d.length) {
+                    return true;
+                }
+            }
 
-			bool bothRegexp = 	Externals.JS.Object.prototype.toString.call(a) == "[object RegExp]" &&
-								Externals.JS.Object.prototype.toString.call(b) == "[object RegExp]";
-			if (bothRegexp) {
-				return compareEquality(a.toString(), b.toString());
-			}
+            bool bothRegexp =   Externals.JS.Object.prototype.toString.call(c) == "[object RegExp]" &&
+                                Externals.JS.Object.prototype.toString.call(d) == "[object RegExp]";
+            if (bothRegexp) {
+                return compareEquality(c.toString(), d.toString());
+            }
 
-			bool bothDate = 	Externals.JS.Object.prototype.toString.call(a) == "[object Date]" &&
-								Externals.JS.Object.prototype.toString.call(b) == "[object Date]";
-			if (bothDate) {
-				return compareEquality(+a, +b);
-			}
+            bool bothDate =     Externals.JS.Object.prototype.toString.call(c) == "[object Date]" &&
+                                Externals.JS.Object.prototype.toString.call(d) == "[object Date]";
+            if (bothDate) {
+                return compareEquality(+c, +d);
+            }
 
-			bool bothObjects = typeof a == "object" && typeof b == "object";
-			ok(bothObjects, "Assert failed: Unexpected type for 'deepCompare'");
+            bool bothObjects = typeof c == "object" && typeof d == "object";
+            ok(bothObjects, "Assert failed: Unexpected type for 'deepCompare'");
 
-			var /*string[]*/ keysA = getObjectKeys(a), keysB = getObjectKeys(b);
-			bool objectsHaveSameKeys = keysA.length == keysB.length;
-			if (objectsHaveSameKeys) {
-				int i = 0, len = keysA.length;
-				string keyA, keyB;
-				var valueA, valueB;
-				bool keysMatch, valuesMatch, valuesDeeplyMatch;
+            var /*string[]*/ keysA = getObjectKeys(c), keysB = getObjectKeys(d);
+            bool objectsHaveSameKeys = keysA.length == keysB.length;
+            if (objectsHaveSameKeys) {
+                int i = 0, len = keysA.length;
+                string keyA = "", keyB = "";
+                var valueA, valueB;
+                bool keysMatch = false, valuesMatch = false, valuesDeeplyMatch = false;
 
-				for (; i < len; ++i) {
-					keyA = keysA[i];
-					valueA = a[keyA];
-					keyB = keysB[i];
-					valueB = b[keyB];
+                for (; i < len; ++i) {
+                    keyA = keysA[i];
+                    valueA = c[keyA];
+                    keyB = keysB[i];
+                    valueB = d[keyB];
 
-					if (~visited.indexOf(valueA)) {
-						continue;
-					}
-					visited.push(valueA);
+                    if (~visited.indexOf(valueA)) {
+                        continue;
+                    }
+                    visited.push(valueA);
 
-					keysMatch = keyA === keyB;
-					valuesMatch = compareEquality(valueA, valueB);
-					if (!keysMatch || !valuesMatch) {
-						valuesDeeplyMatch = recurse(valueA, valueB);
+                    keysMatch = keyA === keyB;
+                    valuesMatch = compareEquality(valueA, valueB);
+                    if (!keysMatch || !valuesMatch) {
+                        valuesDeeplyMatch = recurse(valueA, valueB);
 
-						if (!valuesDeeplyMatch) {
-							break;
-						}
-					}
-				}
+                        if (!valuesDeeplyMatch) {
+                            break;
+                        }
+                    }
+                }
 
-				if (compareEquality(i, keysB.length)) {
-					return true;
-				}
-			}
+                if (compareEquality(i, keysB.length)) {
+                    return true;
+                }
+            }
 
-			return false;
-		})(a, b);
-		visited = null;
+            return false;
+        })(a, b);
+        visited = null;
 
-		return equal;
-	}
+        return equal;
+    }
 }
